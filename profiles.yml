@@ -1,0 +1,17 @@
+ctt_winter_series:
+  target: "{{ env_var('TARGET', 'test') }}"
+  outputs:
+    test:
+      type: duckdb
+      path: data/ctt_winter_series_test.duckdb
+      threads: 2
+
+    dev:
+      type: duckdb
+      path: data/ctt_winter_series_dev.duckdb
+      threads: 2
+    
+    prod:
+      type: duckdb
+      path: "md:ctt_winter_series_prod?motherduck_token={{ env_var('MOTHERDUCK_TOKEN') }}"
+      threads: 2

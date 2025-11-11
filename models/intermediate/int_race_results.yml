@@ -1,0 +1,5 @@
+version: 2
+
+models: 
+  - name: int_race_results
+    description: Transformation layer

@@ -1,0 +1,23 @@
+name: 'ctt_winter_series'
+version: '1.0.0'
+
+profile: 'ctt_winter_series'
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  ctt_winter_series:
+    staging:
+      +schema: staging
+      +materialized: view
+    intermediate:
+      +schema: intermediate
+      +materialized: view
+    core:
+      +schema: core
+      +materialized: table
