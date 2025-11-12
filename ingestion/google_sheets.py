@@ -6,8 +6,8 @@ def ingest_sheets():
     
     target = os.getenv("TARGET")
 
+    motherduck_token = os.getenv("MOTHERDUCK_TOKEN")
     if target == "prod":
-        motherduck_token = os.getenv("MOTHERDUCK_TOKEN")
         database = f"md:ctt_winter_series_prod?motherduck_token={motherduck_token}"
     if target=="dev":
         database = f"md:ctt_winter_series_dev?motherduck_token={motherduck_token}"

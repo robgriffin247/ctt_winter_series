@@ -39,8 +39,8 @@ def ingest_zrapp(event_id) -> LoadInfo:
         }
 
         FLT_VALUES = {
-            "gap":"gap",
-            "time_gun":"time",
+            "gap":"gap_seconds",
+            "time_gun":"time_seconds",
         }
 
         STR_VALUES = {
@@ -67,8 +67,28 @@ def ingest_zrapp(event_id) -> LoadInfo:
             for key, value in STR_VALUES.items():
                 out[value] = str(rider.get(key)) if rider.get(key) is not None else None
 
-            out["unique_event_rider_id"] = f'{out.get("event_id")}_{out.get("rider_id")}'
 
+            LISTED_VALUES = {
+                "weight":"weight", 
+                "np":"watts_normalised", 
+                "avg_power":"watts_average", 
+                "w1200":"watts_20m", 
+                "w300":"watts_5m",
+                "w120":"watts_2m",
+                "w60":"watts_1m",
+                "w30":"watts_30s",
+                "w15":"watts_15s",
+                "w5":"watts_5s"
+            }
+            
+            for key, value in LISTED_VALUES.items():
+                raw = rider.get(key)[0]
+                if isinstance(raw, str) and raw.strip() == "":
+                    raw = None
+                out[value] = float(raw) if raw is not None else None
+            
+            out["unique_event_rider_id"] = f'{out.get("event_id")}_{out.get("rider_id")}'
+            
             yield out
 
     

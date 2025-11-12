@@ -76,7 +76,7 @@ add_route_to_event_results as (
 
 add_rolling_pb as (
   select *,
-    min(time) over (partition by rider_id, route order by start_datetime_utc) as rolling_pb
+    min(time_seconds) over (partition by rider_id, route order by start_datetime_utc) as rolling_pb
   from add_route_to_event_results
 ),
 
@@ -135,7 +135,7 @@ sum_position_points as (
     sum(best_position) as position_points, 
     sum(fts_bonus) as fts_bonus, 
     sum(pb_bonus) as pb_bonus, 
-    sum(round_points) + 50 as points
+    sum(round_points) + 50 as points,
   from point_scoring_rounds
   group by rider_id
 ),
@@ -143,8 +143,9 @@ sum_position_points as (
 add_to_rider_details as (
   select 
     riders.*,
-    sum_position_points.*
+    sum_position_points.*,
+    row_number() over (partition by category order by points) as category_rank,
   from riders left join sum_position_points using(rider_id)
 )
 
-select * from add_to_rider_details order by points
+select * from add_to_rider_details order by category, points
