@@ -44,7 +44,7 @@
 1. Add Python packages
 
     ```
-    uv add httpx duckdb polars dlt dlt[duckdb] dlt[parquet] dbt-core dbt-duckdb
+    uv add httpx duckdb polars dlt dlt[duckdb] dlt[parquet] dbt-core dbt-duckdb modal
     ```
 
 1. Add code for ingestion and transformations
@@ -62,3 +62,5 @@
 1. Transform results with ``uv run dbt build`` 
 
 - Where ingestion and transformation occurs depends on the value of TARGET in the working environment; I have setup to have three databases - two local (test and dev) and prod on MotherDuck
+
+- Add a bank card to Modal to go from $5 to $30 credits free per month

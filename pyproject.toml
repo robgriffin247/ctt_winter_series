@@ -11,5 +11,6 @@ dependencies = [
     "dlt[duckdb,parquet]>=1.18.2",
     "duckdb>=1.4.1",
     "httpx>=0.28.1",
+    "modal>=1.2.2",
     "polars>=1.35.2",
 ]
