@@ -14,7 +14,7 @@ source as (
     time,
     gap,
     load_timestamp_utc,
-  from {{ ref("int_race_results") }}
+  from {{ ref("int_event_results") }}
 )
 
 select * from source

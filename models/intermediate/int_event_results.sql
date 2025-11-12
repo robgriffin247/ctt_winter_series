@@ -14,7 +14,7 @@ source as (
     time,
     gap,
     _dlt_load_id,
-  from {{ ref("stg_race_results") }}
+  from {{ ref("stg_event_results") }}
 ),
 
 add_timestamp as (

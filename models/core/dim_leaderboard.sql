@@ -1,0 +1,150 @@
+-- NEED TO GUARD AGAINST MULTIPLE LOADS OF SAME RACE
+
+with 
+event_results as (
+  select * from {{ ref("dim_event_results") }}
+), 
+
+rounds as (
+  select *
+  from {{ ref("stg_rounds") }}
+),
+
+events as (
+  select *
+  from {{ ref("stg_events") }}
+),
+
+fts_ranks as (
+  select * 
+  from {{ ref("stg_fts_ranks") }}
+),
+
+
+riders as (
+  select
+    rider_id,
+    rider, 
+    club,
+    gender,
+    category
+  from event_results
+  group by all
+),
+
+add_event_details as (
+  select event_results.*, events.round_id, events.start_datetime_utc
+  from event_results left join events using(event_id)
+),
+
+-- Get best position per round
+
+
+round_best_position as (
+  select 
+    round_id, 
+    rider_id,
+    min(category_position) as best_position
+  from add_event_details
+  group by 1, 2
+  order by round_id
+),
+
+
+-- get FTS per round
+fts_points as (
+  select
+    round_id, 
+    rider_id,
+    case fts_rank 
+      when 5 then -1
+      when 4 then -2
+      when 3 then -3
+      when 2 then -4
+      when 1 then -5
+      else 0 end as fts_bonus
+  from fts_ranks
+),
+
+
+
+-- get number of PBs per round
+add_route_to_event_results as (
+  select add_event_details.*, rounds.route
+  from add_event_details left join rounds using(round_id)
+),
+
+add_rolling_pb as (
+  select *,
+    min(time) over (partition by rider_id, route order by start_datetime_utc) as rolling_pb
+  from add_route_to_event_results
+),
+
+add_new_pb as (
+  select *,
+    rolling_pb - lag(rolling_pb) over (partition by rider_id, route order by start_datetime_utc) as pb_change
+  from add_rolling_pb
+),
+
+new_pb as (
+  select *, 
+    case when pb_change<0 then 1 else 0 end as pb_points
+  from add_new_pb
+),
+
+new_pbs_per_round as (
+  select round_id, rider_id, -sum(pb_points) as pb_bonus from new_pb group by 1,2
+),
+
+
+-- Get it all added up
+combine_all_points as (
+  select
+    round_best_position.*,
+    coalesce(fts_points.fts_bonus, 0) as fts_bonus,
+    coalesce(new_pbs_per_round.pb_bonus, 0) as pb_bonus,
+    round_best_position.best_position + coalesce(new_pbs_per_round.pb_bonus, 0) + coalesce(fts_points.fts_bonus, 0) as round_points
+  from round_best_position
+    left join fts_points using(round_id, rider_id)
+    left join new_pbs_per_round using(round_id, rider_id)
+),
+
+add_type as (
+  select combine_all_points.*, rounds.type
+  from combine_all_points 
+    left join rounds using(round_id)
+),
+
+-- -- QUESTION whether to also deduct FTS and PB before this; so do this on best pos or best_pos - fts - pb; switch to round_points or best_position
+add_row_number as (
+  select *, row_number() over (partition by rider_id, type order by round_points) as rider_round_points_rank_by_type
+  from add_type
+),
+
+point_scoring_rounds as (
+  select * from add_row_number
+  where 
+    (type='flat' and rider_round_points_rank_by_type <= 4)
+    or (type='rolling' and rider_round_points_rank_by_type <= 2)
+    or (type='mountain' and rider_round_points_rank_by_type = 1)
+),
+
+sum_position_points as (
+  select 
+    rider_id, 
+    sum(best_position) as position_points, 
+    sum(fts_bonus) as fts_bonus, 
+    sum(pb_bonus) as pb_bonus, 
+    sum(round_points) + 50 as points
+  from point_scoring_rounds
+  group by rider_id
+),
+
+add_to_rider_details as (
+  select 
+    riders.*,
+    sum_position_points.*
+  from riders left join sum_position_points using(rider_id)
+)
+
+select * from add_to_rider_details order by points

@@ -15,7 +15,7 @@ def ingest_zrapp(event_id) -> LoadInfo:
     header = {'Authorization':os.getenv("ZRAPP_API_KEY")}
     url = f"https://zwift-ranking.herokuapp.com/public/" # /zp/{id}/results
 
-    @dlt.resource(name="race_results",
+    @dlt.resource(name="event_results",
                   write_disposition="merge",
                   primary_key="unique_event_rider_id")
     def get_results(event_id: int) -> Iterator[dict[str, Any]]:
@@ -87,9 +87,12 @@ def ingest_zrapp(event_id) -> LoadInfo:
             }
         )
     if target=="dev":
-        _destination = dlt.destinations.duckdb(
-            credentials="data/ctt_winter_series_dev.duckdb"
-        )    
+        _destination = dlt.destinations.motherduck(
+            credentials={
+                "database": "ctt_winter_series_dev",
+                "motherduck_token": os.environ["MOTHERDUCK_TOKEN"],
+            }
+        )
     if target=="test":
         _destination = dlt.destinations.duckdb(
             credentials="data/ctt_winter_series_test.duckdb"

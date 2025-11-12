@@ -8,7 +8,7 @@ ctt_winter_series:
 
     dev:
       type: duckdb
-      path: data/ctt_winter_series_dev.duckdb
+      path: "md:ctt_winter_series_dev?motherduck_token={{ env_var('MOTHERDUCK_TOKEN') }}"
       threads: 2
     
     prod:
