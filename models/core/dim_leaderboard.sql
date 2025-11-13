@@ -17,7 +17,7 @@ events as (
 
 fts_ranks as (
   select * 
-  from {{ ref("stg_fts_ranks") }}
+  from {{ ref("int_fts_ranks") }}
 ),
 
 
@@ -38,13 +38,11 @@ add_event_details as (
 ),
 
 -- Get best position per round
-
-
-round_best_position as (
+round_best_category_position as (
   select 
     round_id, 
     rider_id,
-    min(category_position) as best_position
+    min(category_position) as best_category_position
   from add_event_details
   group by 1, 2
   order by round_id
@@ -56,12 +54,12 @@ fts_points as (
   select
     round_id, 
     rider_id,
-    case fts_rank 
-      when 5 then -1
-      when 4 then -2
-      when 3 then -3
-      when 2 then -4
-      when 1 then -5
+    case round_rank 
+      when 5 then 0 -- -1
+      when 4 then 0 -- -2
+      when 3 then 0 -- -3
+      when 2 then 0 -- -4
+      when 1 then 0 -- -5
       else 0 end as fts_bonus
   from fts_ranks
 ),
@@ -100,11 +98,11 @@ new_pbs_per_round as (
 -- Get it all added up
 combine_all_points as (
   select
-    round_best_position.*,
+    round_best_category_position.*,
     coalesce(fts_points.fts_bonus, 0) as fts_bonus,
     coalesce(new_pbs_per_round.pb_bonus, 0) as pb_bonus,
-    round_best_position.best_position + coalesce(new_pbs_per_round.pb_bonus, 0) + coalesce(fts_points.fts_bonus, 0) as round_points
-  from round_best_position
+    round_best_category_position.best_category_position + coalesce(new_pbs_per_round.pb_bonus, 0) + coalesce(fts_points.fts_bonus, 0) as round_points
+  from round_best_category_position
     left join fts_points using(round_id, rider_id)
     left join new_pbs_per_round using(round_id, rider_id)
 ),
@@ -115,7 +113,6 @@ add_type as (
     left join rounds using(round_id)
 ),
 
--- -- QUESTION whether to also deduct FTS and PB before this; so do this on best pos or best_pos - fts - pb; switch to round_points or best_position
 add_row_number as (
   select *, row_number() over (partition by rider_id, type order by round_points) as rider_round_points_rank_by_type
   from add_type
@@ -132,7 +129,7 @@ point_scoring_rounds as (
 sum_position_points as (
   select 
     rider_id, 
-    sum(best_position) as position_points, 
+    sum(best_category_position) as position_points, 
     sum(fts_bonus) as fts_bonus, 
     sum(pb_bonus) as pb_bonus, 
     sum(round_points) + 50 as points,
@@ -146,6 +143,21 @@ add_to_rider_details as (
     sum_position_points.* exclude(rider_id),
     row_number() over (partition by category order by points) as category_rank,
   from riders left join sum_position_points using(rider_id)
+),
+
+select_cols as (
+  select
+    rider_id,
+    category, 
+    category_rank,
+    rider,
+    club,
+    points,
+    position_points,
+    fts_bonus,
+    pb_bonus
+  from add_to_rider_details
+  order by category, points
 )
 
-select * from add_to_rider_details order by category, points
+select * from select_cols 

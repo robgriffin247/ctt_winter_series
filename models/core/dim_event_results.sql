@@ -12,6 +12,8 @@ source as (
     gender,
     position,
     category_position,
+    gender_position,
+    category_gender_position,
     time_seconds,
     time_formatted,
     gap_seconds,

@@ -13,4 +13,4 @@ sources:
     tables:
       - name: rounds
       - name: events
-      - name: fts_ranks
+      - name: fts_times

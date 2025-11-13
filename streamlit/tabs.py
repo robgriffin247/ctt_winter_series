@@ -23,7 +23,7 @@ def render_leaderboard_tab(tab, data):
         data_filtered = data.filter(pl.col("rider").is_in(riders)) if len(riders)>0 else data_filtered
         
         table_container.dataframe(
-            data_filtered[["category", "category_rank", "rider", "club", "points", "position_points", "fts_bonus", "pb_bonus"]],
+            data_filtered.select(pl.all().exclude("rider_id")),
             column_config={
                 "category":st.column_config.TextColumn("Cat."),
                 "category_rank":st.column_config.NumberColumn("Rank"),
