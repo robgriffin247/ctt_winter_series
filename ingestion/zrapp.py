@@ -8,7 +8,7 @@ from typing import Any
 from collections.abc import Iterator
 from dlt.common.pipeline import LoadInfo
 from dlt.extract import DltResource
-
+import html
 
 def ingest_zrapp(event_id) -> LoadInfo:
 
@@ -65,7 +65,11 @@ def ingest_zrapp(event_id) -> LoadInfo:
                 out[value] = float(raw) if raw is not None else None
 
             for key, value in STR_VALUES.items():
-                out[value] = str(rider.get(key)) if rider.get(key) is not None else None
+                raw = rider.get(key)
+                if raw is not None:
+                    out[value] = html.unescape(str(raw))
+                else:
+                    out[value] = None
 
 
             LISTED_VALUES = {

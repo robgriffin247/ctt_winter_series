@@ -1,6 +1,6 @@
 # ctt_winter_series
 
-### Setup
+### DevLog
 
 1. Clone the repo
 
@@ -44,7 +44,7 @@
 1. Add Python packages
 
     ```
-    uv add httpx duckdb polars dlt dlt[duckdb] dlt[parquet] dbt-core dbt-duckdb modal
+    uv add httpx duckdb polars dlt dlt[duckdb] dlt[parquet] dbt-core dbt-duckdb streamlit
     ```
 
 1. Add code for ingestion and transformations
@@ -57,10 +57,19 @@
 
 1. Set up MotherDuck account and token
 
+## Run
+
+Where ingestion and transformation occurs depends on the value of ``TARGET`` in the working environment (e.g. ``export TARGET="test"``); I have setup with three target databases;
+
+- ``test``; a duckdb database for local development
+- ``dev``; a MotherDuck databse for testing deployment
+- ``prod``; a MotherDuck database for production deployment
+
+... yes, I'd have had ``dev`` and ``test`` the other way around if I was rebuilding, but I built quickly and it still works.
+
 1. Get results with ``uv run python3 ingestion/zrapp.py <id>``
+
+1. Get Google Sheets data with ``uv run python3 ingestion/google_sheets.py``
 
 1. Transform results with ``uv run dbt build`` 
 
-- Where ingestion and transformation occurs depends on the value of TARGET in the working environment; I have setup to have three databases - two local (test and dev) and prod on MotherDuck
-
-- Add a bank card to Modal to go from $5 to $30 credits free per month

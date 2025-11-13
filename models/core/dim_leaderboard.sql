@@ -143,7 +143,7 @@ sum_position_points as (
 add_to_rider_details as (
   select 
     riders.*,
-    sum_position_points.*,
+    sum_position_points.* exclude(rider_id),
     row_number() over (partition by category order by points) as category_rank,
   from riders left join sum_position_points using(rider_id)
 )

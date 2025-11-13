@@ -9,7 +9,7 @@ source as (
     category,
     club_id,
     club,
-    gender,
+    upper(gender) as gender,
     position,
     category_position,
     time_seconds,

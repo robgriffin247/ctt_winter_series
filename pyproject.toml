@@ -13,4 +13,5 @@ dependencies = [
     "httpx>=0.28.1",
     "modal>=1.2.2",
     "polars>=1.35.2",
+    "streamlit>=1.51.0",
 ]
