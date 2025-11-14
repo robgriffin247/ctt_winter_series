@@ -15,7 +15,7 @@ def ingest_zrapp(event_id) -> LoadInfo:
     header = {'Authorization':os.getenv("ZRAPP_API_KEY")}
     url = f"https://zwift-ranking.herokuapp.com/public/" # /zp/{id}/results
 
-    @dlt.resource(name="event_results",
+    @dlt.resource(name="results",
                   write_disposition="merge",
                   primary_key="unique_event_rider_id")
     def get_results(event_id: int) -> Iterator[dict[str, Any]]:

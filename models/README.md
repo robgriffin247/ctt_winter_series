@@ -1,12 +1,8 @@
-# Status
+# Todo
 
-Currently remodelling; 
-
-- [ ] get FTS per round
-- [x] stg_event_results -> stg_results
-- [ ] dim_standings to replace dim leaderboard
-- [ ] remodel int_fts_ranks (possible rename)
-- [ ] Rename ingestion tables, google_sheets and source.yml accordingly
+- [ ] Remodel the dim_results layer to be round, not event; DO NOT CHANGE INT_RESULTS
+- [ ] Finish Streamlit app
+- [ ] Deploy App
 
 # Staging
 

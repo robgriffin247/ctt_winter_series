@@ -2,7 +2,7 @@ with
 
 source as (
   select * 
-  from {{ source("zrapp", "event_results")}}
+  from {{ source("zrapp", "results")}}
 ),
 
 select_type_and_rename as (
