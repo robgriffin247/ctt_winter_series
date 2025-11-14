@@ -1,7 +1,7 @@
 import streamlit as st
 import polars as pl 
 
-def render_leaderboard_tab(tab, data):
+def render_standings_tab(tab, data):
     with tab:
         # Layout
         st.write("  ")

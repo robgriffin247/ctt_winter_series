@@ -34,7 +34,7 @@ def ingest_zrapp(event_id) -> LoadInfo:
             "zwid":"rider_id",
             "tid":"club_id",
             "male":"gender_numeric",
-            "pos":"position",
+            "pos":"zp_position",
             "position_in_cat":"category_position",
         }
 
@@ -76,10 +76,10 @@ def ingest_zrapp(event_id) -> LoadInfo:
                 "weight":"weight", 
                 "np":"watts_normalised", 
                 "avg_power":"watts_average", 
-                "w1200":"watts_20m", 
-                "w300":"watts_5m",
-                "w120":"watts_2m",
-                "w60":"watts_1m",
+                "w1200":"watts_1200s", 
+                "w300":"watts_300s",
+                "w120":"watts_120s",
+                "w60":"watts_60s",
                 "w30":"watts_30s",
                 "w15":"watts_15s",
                 "w5":"watts_5s"

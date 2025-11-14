@@ -26,7 +26,7 @@ def ingest_sheets():
 
             print(f"Loaded {sheet.upper()} from Google Sheets")
 
-    for s in ["rounds", "events", "fts_times"]:
+    for s in ["rounds", "events", "segment_times"]:
         get_sheet(s)
 
 
