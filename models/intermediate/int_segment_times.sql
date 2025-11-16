@@ -7,7 +7,7 @@ segment_times as (
 get_time_part as (
     select 
         event_id, 
-        position, 
+        zp_position, 
         rider_segments, 
         trim(str_split(time, chr(10))[1]) as time
     from segment_times

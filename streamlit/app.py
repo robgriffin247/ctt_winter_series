@@ -2,7 +2,7 @@ import streamlit as st
 import duckdb
 import polars as pl
 import html
-from tabs import render_standings_tab
+from tabs import render_standings_tab, render_race_results_tab
 
 st.set_page_config(#layout="wide",
                    page_title="CTT Winter Series 2025/26",
@@ -19,12 +19,11 @@ def load_data():
 
 results, standings = load_data()
 
-standings_tab, results_tab, stats_tab, calendar_tab, rules_tab = st.tabs(["Standings", "Race Results", "Statistics", "Calendar", "Rules"])
+# standings_tab, results_tab, stats_tab, calendar_tab, rules_tab = st.tabs(["Standings", "Race Results", "Statistics", "Calendar", "Rules"])
+standings_tab, race_results_tab = st.tabs(["Standings", "Race Results"])
 
 render_standings_tab(standings_tab, standings)
 
-with results_tab:
-    st.dataframe(results)
-
-with rules_tab:
-    st.markdown("*Position Points = Sum of best seven positions from four flat, two rolling and one mountain race*")
+render_race_results_tab(race_results_tab, results)
+# with rules_tab:
+#     st.markdown("*Position Points = Sum of best seven positions from four flat, two rolling and one mountain race*")

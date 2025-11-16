@@ -8,7 +8,7 @@ source as (
 select_type_and_rename as (
   select
     event_id::int as event_id,
-    position::int as position,
+    zp_position::int as zp_position,
     rider::varchar as rider_segments,
     data::varchar as time,
   from source
