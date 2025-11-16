@@ -55,7 +55,12 @@
     - dbt_project.yml
     - profiles.yml
 
+    At this point in development, I have built a large number of models; see the [models](https://github.com/robgriffin247/ctt_winter_series/tree/main/models).
+
+
 1. Set up MotherDuck account and token
+
+1. Add a streamlit app as ``streamlit/app.py``
 
 ## Run
 
@@ -67,9 +72,4 @@ Where ingestion and transformation occurs depends on the value of ``TARGET`` in 
 
 ... yes, I'd have had ``dev`` and ``test`` the other way around if I was rebuilding, but I built quickly and it still works.
 
-1. Get results with ``uv run python3 ingestion/zrapp.py <id>``
-
-1. Get Google Sheets data with ``uv run python3 ingestion/google_sheets.py``
-
-1. Transform results with ``uv run dbt build`` 
-
+See ``README.md`` files in [``ingestion``](https://github.com/robgriffin247/ctt_winter_series/tree/main/ingestion) and [``models``](https://github.com/robgriffin247/ctt_winter_series/tree/main/models) for instructions on running the data pipeline.

@@ -1,11 +1,16 @@
-# Todo
+The transformation layer takes distributed raw data and combines and transforms it into production-ready data.
 
-- [ ] Remodel the dim_results layer to be round, not event; DO NOT CHANGE INT_RESULTS
-- [ ] Finish Streamlit app
-- [ ] Deploy App
+- Staging is to take raw data into staging layer, setting column names, data types and selecting columns.
+- Intermediate is the major transformation layer, with joins, decoding, derivations.
+- Core is the production-ready layer; selecting columns and sorting rows needed to produce analytics outputs
 
-# Staging
+Transformation is performed with:
 
-Set type, rename and select
+```
+uv run duckdb build
+```
 
-- 
+#### To Do
+
+- [ ] Add selection and sorting to core layer
+- [ ] Add user-friendly formatting to values like time_seconds 
