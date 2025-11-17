@@ -8,7 +8,7 @@ source as (
 select_type_and_rename as (
   select
     round_id::int as round_id,
-    type::varchar as type,
+    type::varchar as route_type,
     route::varchar as route,
   from source
 )

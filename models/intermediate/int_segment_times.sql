@@ -8,19 +8,19 @@ get_time_part as (
     select 
         event_id, 
         zp_position, 
-        rider_segments, 
-        trim(str_split(time, chr(10))[1]) as time
+        segments_rider, 
+        trim(str_split(segment_data, chr(10))[1]) as segment_data_timepart
     from segment_times
 ),
 
 parse_seconds as (
-  select * exclude(time),
+  select * exclude(segment_data_timepart),
     case 
-      when contains(time, ':') then 
-        ((str_split(time, ':')[1]::int * 60) + 
-        (str_split(time, ':')[2]::int))::float8
+      when contains(segment_data_timepart, ':') then 
+        ((str_split(segment_data_timepart, ':')[1]::int * 60) + 
+        (str_split(segment_data_timepart, ':')[2]::int))::float8
       else 
-        time::float8
+        segment_data_timepart::float8
       end as segment_seconds
   from get_time_part  
 )

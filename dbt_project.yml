@@ -14,10 +14,10 @@ models:
   ctt_winter_series:
     staging:
       +schema: staging
-      +materialized: view
+      +materialized: table
     intermediate:
       +schema: intermediate
-      +materialized: view
+      +materialized: table
     core:
       +schema: core
       +materialized: table

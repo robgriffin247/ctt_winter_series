@@ -12,49 +12,32 @@ def render_standings_tab(tab, data):
         st.write("  ")
         table_container = st.container()
         st.divider()
-        st.markdown("**Points = 50 + Position - FTS Bonus - PB Bonus*")
 
         # Backend
-        category = c1.selectbox("Category", options=["All", "A", "B", "C", "D"])
-        data_filtered = data.filter(pl.col("category")==category) if category!="All" else data
+        category = c1.selectbox("Category", options=["A", "B", "C", "D"])
+        data_filtered = data.filter(pl.col("power_category")==category)
 
-        gender = c2.selectbox("Gender", options=["Mixed", "Womens", "Mens"])
-        data_filtered = data_filtered.filter(pl.col("gender")=="F" if gender=="Womens" else pl.col("gender")=="M") if gender!="Mixed" else data_filtered
+        gender = c2.selectbox("Gender", options=["Mixed", "Womens"])
+        data_filtered = data_filtered.filter(pl.col("gender_category")==gender)
         
-        data_filtered = data_filtered.with_row_index("rank", offset=1)
-
         riders = rider_search.multiselect("Riders", 
                                  options=data_filtered.sort(pl.col("rider"))[["rider"]].unique(), 
                                  key="standings_riders")
+        
         data_filtered = data_filtered.filter(pl.col("rider").is_in(riders)) if len(riders)>0 else data_filtered
         
-
-        columns = ["rank", "rider", "category", "gender"]
-
-        if category=="All" and gender=="Mixed":
-            columns += ["overall_score"]
-
-        if category!="All" and gender=="Mixed":
-            columns += ["category_score"]
-
-        if category=="All" and gender!="Mixed":
-            columns += ["gender_score"]
-
-        if category!="All" and gender!="Mixed":
-            columns += ["category_gender_score"]
+        
 
 
         table_container.dataframe(
-            data_filtered[columns],
+            data_filtered[["rank", "rider", "score", "position_points", "segment_bonuses", "pb_bonuses"]],
             column_config={
-                "rank":st.column_config.NumberColumn("Rank", width=16),
-                "category":st.column_config.TextColumn("Category"),
+                "rank":st.column_config.NumberColumn("Pos.", width=16),
                 "rider":st.column_config.TextColumn("Rider"),
-                "gender":st.column_config.TextColumn("Gender"),
-                "overall_score":st.column_config.NumberColumn("Points"),
-                "category_score":st.column_config.NumberColumn("Points"),
-                "gender_score":st.column_config.NumberColumn("Points"),
-                "category_gender_score":st.column_config.NumberColumn("Points"),
+                "score":st.column_config.NumberColumn("Points"),
+                "position_points":st.column_config.NumberColumn("Positon Points"),
+                "segment_bonuses":st.column_config.NumberColumn("FTS Bonuses"),
+                "pb_bonuses":st.column_config.NumberColumn("PB Bonuses"),
             })
 
 
