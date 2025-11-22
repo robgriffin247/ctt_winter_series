@@ -1,5 +1,6 @@
 with round_results as (
     select * from {{ ref("int_round_results") }}
+    where round_id<=2
 ),
 
 rank_rider_performances as (
@@ -19,6 +20,7 @@ best_seven as (
 
 sum_scores as (
   select rider_id, rider, gender, gender_category, power_category, 
+    sum(1) as race_count,
     sum(race_rank) as position_points,
     sum(segment_bonus) as segment_bonuses,
     sum(pb_bonus) as pb_bonuses,

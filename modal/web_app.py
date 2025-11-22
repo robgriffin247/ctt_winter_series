@@ -20,7 +20,7 @@ app = modal.App("ctt-winter-series-2025-26", image=image)
 
 
 @app.function(secrets=[modal.Secret.from_name("ctt-secrets")])
-@modal.concurrent(max_inputs=50)
+@modal.concurrent(max_inputs=200)
 @modal.web_server(8000)
 def host_web_app():
     cmd = f"streamlit run {app_remote_path} --server.port 8000 --server.enableCORS=false --server.enableXsrfProtection=false"

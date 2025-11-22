@@ -6,12 +6,14 @@ with source as (
     gender, 
     gender_category, 
     power_category, 
+    race_count,
     position_points,
     segment_bonuses,
     pb_bonuses,
     score,
   from {{ ref("int_standings") }}
-  order by gender_category, power_category, score
+  order by gender_category, power_category, race_count desc, score
 )
 
-select * from source
+select * 
+from source

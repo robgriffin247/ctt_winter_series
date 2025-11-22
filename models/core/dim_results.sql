@@ -31,7 +31,7 @@ mixed_results as (
     rider_id,
     rider,
     gender,
-    'mixed' as gender_category,
+    'Mixed' as gender_category,
     mixed_category as power_category,
     watts_average,
     watts_kg_average,
@@ -49,7 +49,7 @@ womens_results as (
     rider_id,
     rider,
     gender,
-    'womens' as gender_category,
+    'Womens' as gender_category,
     womens_category as power_category,
     watts_average,
     watts_kg_average,
@@ -64,4 +64,7 @@ unioned as (
   select * from mixed_results union all select * from womens_results
 )
 
-select * exclude(start_datetime_utc) from unioned order by start_datetime_utc, gender_category, power_category, race_seconds, segment_seconds
+select * exclude(start_datetime_utc) 
+from unioned 
+where round_id<=2
+order by start_datetime_utc, gender_category, power_category, race_seconds, segment_seconds

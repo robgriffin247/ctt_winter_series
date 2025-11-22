@@ -22,3 +22,4 @@ with source as (
 )
 
 select * from source
+where round_id<=2
