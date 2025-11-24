@@ -7,4 +7,4 @@ for arg in "$@"; do
     sleep 62
     done
     
-uv run dbt build
+#uv run dbt build

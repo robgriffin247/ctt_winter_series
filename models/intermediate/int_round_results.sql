@@ -46,7 +46,7 @@ bonuses as (
 scores as (
     select 
         *, 
-        50 + race_rank + segment_bonus + pb_bonus as score
+        race_rank + segment_bonus + pb_bonus as score
     from bonuses
 )
 

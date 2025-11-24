@@ -30,8 +30,8 @@ sum_scores as (
 ),
 
 add_leaderboard_rank as (
-  select *,
-    rank() over (partition by gender_category, power_category order by score) as rank
+  select * exclude(score), 50 + score as score,
+    rank() over (partition by gender_category, power_category order by race_count desc, score) as rank
     
   from sum_scores
 )

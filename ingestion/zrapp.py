@@ -83,6 +83,14 @@ def ingest_zrapp(event_id) -> LoadInfo:
                 "w30": "watts_30s",
                 "w15": "watts_15s",
                 "w5": "watts_5s",
+                "avg_wkg": "wkg_average",
+                "wkg1200": "wkg_1200s",
+                "wkg300": "wkg_300s",
+                "wkg120": "wkg_120s",
+                "wkg60": "wkg_60s",
+                "wkg30": "wkg_30s",
+                "wkg15": "wkg_15s",
+                "wkg5": "wkg_5s",
             }
 
             for key, value in LISTED_VALUES.items():

@@ -3,7 +3,7 @@ version: '1.0.0'
 
 profile: 'ctt_winter_series'
 
-model-paths: ["models"]
+model-paths: ["_models"]
 macro-paths: ["macros"]
 
 clean-targets:

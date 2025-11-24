@@ -9,7 +9,6 @@ with source as (
         gender_category,
         power_category,
         watts_average,
-        watts_kg_average,
         race_seconds,
         new_pb,
         segment_seconds,
