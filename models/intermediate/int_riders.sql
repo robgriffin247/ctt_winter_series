@@ -1,84 +1,68 @@
 with 
-  
-results as (
-  select * 
-  from {{ref("stg_results")}}
-  ),
 
-events as (
-    select event_id, start_datetime_utc
-    from {{ref("stg_events")}}
+race_results as (
+    select *
+    from {{ref("stg_race_results")}}
 ),
 
-add_start as (
-    select results.*, events.start_datetime_utc
-    from results left join events using(event_id)
+races as (
+    select *
+    from {{ref("stg_races") }}
 ),
 
-riders as (
-  select 
-    rider_id, 
-    row_number() over (partition by rider_id order by start_datetime_utc)=1 as most_recent,
-    last(rider) over (partition by rider_id order by start_datetime_utc) as rider, 
-    max(gender_numeric) over (partition by rider_id) as gender_numeric
-  from add_start 
+join_race_date as (
+    select race_results.*, races.start_datetime_utc
+    from race_results left join races using(event_id)
 ),
 
-distinct_riders as (
-    select * exclude(most_recent) from riders where most_recent
-),
-
-derive_weight as (
-    select * exclude(weight),
-        case when weight is null or weight = 0 then 
-            ( (watts_average/wkg_average) + 
-                (watts_1200s/wkg_1200s) +
-                (watts_300s/wkg_300s) + 
-                (watts_120s/wkg_120s) + 
-                (watts_60s/wkg_60s) +
-                (watts_30s/wkg_30s) +
-                (watts_15s/wkg_15s) +
-                (watts_5s/wkg_5s) ) / 8 
-            else weight end as weight
-    from results
-),
-
-max_powers as (
-  select 
-    rider_id, 
-    max(watts_average) as watts, 
-    max(watts_average/weight) as wkg 
-  from derive_weight group by 1),
-
-combine_max_powers as (
+rider_names as (
     select
-        distinct_riders.*,
-        max_powers.watts,
-        max_powers.wkg
-    from distinct_riders left join max_powers using(rider_id)
+        rider_id, rider,
+        row_number() over (partition by rider_id order by start_datetime_utc)=1 as latest
+    from join_race_date
 ),
-  
+
+latest_rider_names as (
+    select rider_id, rider from rider_names where latest
+),
+
+rider_genders_and_power as (
+    select
+        rider_id,
+        max(gender_numeric) as gender_numeric,
+        max(watts_average) as watts_max,
+        max(wkg_average) as wkg_max
+    from race_results
+    group by rider_id
+),
+
+join_rider_names as (
+    select latest_rider_names.*, rider_genders_and_power.* exclude(rider_id)
+    from latest_rider_names left join rider_genders_and_power using(rider_id)
+),
+
 add_categories as (
-  select 
-    rider_id,
-    rider,
-    gender_numeric,
-    watts,
-    wkg,
+    select 
+    *,
     case
-      when watts>=250 or wkg>=4.2 then 'A'
-      when watts>=200 or wkg>=3.36 then 'B'
-      when watts>=150 or wkg>=2.63 then 'C'
-      when watts>0 or wkg>0 then 'D'
+      when watts_max>=250 and wkg_max>=4.2 then 'A'
+      when watts_max>=200 and wkg_max>=3.36 then 'B'
+      when watts_max>=150 and wkg_max>=2.63 then 'C'
+      when watts_max>0 and wkg_max>0 then 'D'
       else null end as mixed_category,
     case
-      when gender_numeric=0 and wkg>=3.88 then 'A'
-      when gender_numeric=0 and wkg>=3.36 then 'B'
-      when gender_numeric=0 and wkg>=2.63 then 'C'
-      when gender_numeric=0 and wkg<2.63 then 'D'
+      when gender_numeric=0 and wkg_max>=3.88 then 'A'
+      when gender_numeric=0 and wkg_max>=3.36 then 'B'
+      when gender_numeric=0 and wkg_max>=2.63 then 'C'
+      when gender_numeric=0 and wkg_max<2.63 then 'D'
       else null end as womens_category
-  from combine_max_powers
+  from join_rider_names
+),
+
+decode_gender as (
+    select * exclude(gender_numeric),
+        case gender_numeric when 1 then 'M' when 0 then 'F' else null end as gender 
+    from add_categories
 )
 
-
-select * from add_categories
+select rider_id, rider, gender, mixed_category, womens_category from decode_gender

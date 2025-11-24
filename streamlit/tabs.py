@@ -15,7 +15,7 @@ def filters(tab, data):
     )
     data_filtered = data.filter(pl.col("power_category") == category)
 
-    gender = c2.selectbox("Gender", options=["Mixed", "Womens"], key=f"gender_{tab}")
+    gender = c2.selectbox("Gender", options=["Mixed", "Womens", "Mens"], key=f"gender_{tab}")
     data_filtered = data_filtered.filter(pl.col("gender_category") == gender)
 
     riders = c3.multiselect(
