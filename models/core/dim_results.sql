@@ -1,6 +1,7 @@
 with
 select_columns as (
     select
+        round_id,
         route,
         start_datetime_utc,
         rider,
@@ -10,8 +11,11 @@ select_columns as (
         watts_average,
         wkg_average,
         race_seconds,
+        race_speed,
+        race_time,
         new_pb,
-        segment_seconds
+        segment_seconds,
+        segment_time,
     from {{ref("int_results")}}
 )
 

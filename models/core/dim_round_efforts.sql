@@ -15,8 +15,10 @@ results as (
         watts_average,
         wkg_average,
         race_seconds,
+        race_time,
         new_pb,
-        segment_seconds
+        segment_seconds,
+        segment_time
     from {{ref("int_results")}}
 ),
 
@@ -33,7 +35,7 @@ best_efforts as (
 add_round_ranks as (
     select *,
         rank() over (partition by round_id, gender_category, power_category order by race_seconds) as race_rank,
-        rank() over (partition by round_id, gender_category, power_category order by race_seconds) as segment_rank,
+        rank() over (partition by round_id, gender_category, power_category order by segment_seconds) as segment_rank,
     from best_efforts
 )
 

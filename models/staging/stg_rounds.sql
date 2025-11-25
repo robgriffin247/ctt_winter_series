@@ -10,6 +10,7 @@ select_type_and_rename as (
     round_id::int as round_id,
     type::varchar as route_type,
     route::varchar as route,
+    route_length::float as route_length
   from source
 )
 
