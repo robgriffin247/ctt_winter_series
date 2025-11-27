@@ -4,6 +4,8 @@ riders as (
     select 
         rider_id,
         rider, 
+        club,
+        club_id,
         gender, 
         mixed_category,
         womens_category
@@ -21,13 +23,12 @@ race_results as (
     from {{ref("stg_race_results")}}
 ),
 
-segment_results as (
-    select 
-        event_id, 
-        zp_position, 
-        segments_rider, 
+fts_times as (
+    select
+        event_id,
+        rider_id,
         segment_seconds
-    from {{ref("int_segment_results")}}
+    from {{ref("int_fts_times")}}
 ),
 
 rounds as (
@@ -36,6 +37,7 @@ rounds as (
         route,
         route_type,
         route_length,
+        route_elevation,
     from {{ref("stg_rounds")}}
 ),
 
@@ -55,12 +57,10 @@ races_rounds as (
 ),
 
 combine_results as (
-    select 
-        race_results.*, 
-        segment_results.segment_seconds,
-        segment_results.segments_rider
-    from race_results 
-        left join segment_results using(event_id, zp_position)
+    select
+        race_results.*,
+        fts_times.segment_seconds
+    from race_results left join fts_times using(event_id, rider_id)
 ),
 
 add_rider_data as (
@@ -68,6 +68,8 @@ add_rider_data as (
         combine_results.event_id,
         combine_results.rider_id,
         riders.rider,
+        riders.club_id,
+        riders.club,
         riders.gender,
         riders.mixed_category,
         riders.womens_category,
@@ -75,7 +77,6 @@ add_rider_data as (
         combine_results.wkg_average,
         combine_results.race_seconds,
         combine_results.segment_seconds,
-        combine_results.segments_rider
     from combine_results left join riders using(rider_id)
 ),
 
@@ -85,6 +86,7 @@ add_round_data as (
         races_rounds.route,
         races_rounds.route_type,
         races_rounds.route_length,
+        races_rounds.route_elevation,
         races_rounds.start_datetime_utc,
         add_rider_data.*,
     from add_rider_data
@@ -117,12 +119,12 @@ mark_pbs as (
 add_times as (
     select *, 
         route_length / (race_seconds / 3600) as race_speed,
-        printf('%02d:%02d:%06.2f', 
+        printf('%02d:%02d:%05.2f', 
             cast(floor(race_seconds / 3600) as integer),
             cast(floor((race_seconds % 3600) / 60) as integer),
             race_seconds % 60
         ) AS race_time, 
-        printf('%02d:%06.2f', 
+        printf('%02d:%05.2f', 
             cast(floor((segment_seconds % 3600) / 60) as integer),
             segment_seconds % 60
         ) AS segment_time
@@ -134,12 +136,14 @@ select_columns as (
         round_id,
         route,
         route_length,
+        route_elevation,
         route_type,
         event_id,
         start_datetime_utc,
         rider_id,
         rider,
-        segments_rider,
+        club_id,
+        club,
         gender,
         gender_category,
         power_category,
@@ -155,3 +159,4 @@ select_columns as (
 )
 
 select * from select_columns
+where round_id<=2

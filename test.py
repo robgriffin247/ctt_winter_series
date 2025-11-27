@@ -41,10 +41,14 @@ def get_result(id):
     return results
 
 if __name__=="__main__":
-    with duckdb.connect("data/ctt_winter_series_test.duckdb") as con:
-        ids = con.sql("select rider_id from staging.stg_results where weight=0").pl()["rider_id"].to_list()
+    riders = get_zp_result(5145077)
+    for rider in riders:
+        if rider.get("zwid")==651801:
+            print(rider)
+    # with duckdb.connect("data/ctt_winter_series_test.duckdb") as con:
+    #     ids = con.sql("select rider_id from staging.stg_results where weight=0").pl()["rider_id"].to_list()
     
-    riders = get_riders(ids)
+    # riders = get_riders(ids)
 
-    with open("temp.json", "w") as f:
-        f.dumps(riders)
+    # with open("temp.json", "w") as f:
+    #     f.dumps(riders)

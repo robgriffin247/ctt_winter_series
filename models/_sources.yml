@@ -14,3 +14,8 @@ sources:
       - name: rounds
       - name: events
       - name: segment_times
+  - name: zpdatafetch
+    description: Data from zpdatafetch
+    schema: zpdatafetch
+    tables:
+      - name: sprint_results

@@ -3,8 +3,13 @@ select_columns as (
     select
         round_id,
         route,
+        route_length,
+        route_elevation,
         start_datetime_utc,
+        rider_id,
         rider,
+        club_id,
+        club,
         gender,
         gender_category,
         power_category,

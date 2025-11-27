@@ -11,19 +11,20 @@ races as (
 ),
 
 join_race_date as (
-    select race_results.*, races.start_datetime_utc
+    select race_results.*, races.start_datetime_utc, races.round_id
     from race_results left join races using(event_id)
+    where races.round_id<=2
 ),
 
 rider_names as (
     select
-        rider_id, rider,
+        rider_id, rider, club_id, club,
         row_number() over (partition by rider_id order by start_datetime_utc)=1 as latest
     from join_race_date
 ),
 
 latest_rider_names as (
-    select rider_id, rider from rider_names where latest
+    select rider_id, rider, club_id, club from rider_names where latest
 ),
 
 rider_genders_and_power as (
@@ -31,8 +32,9 @@ rider_genders_and_power as (
         rider_id,
         max(gender_numeric) as gender_numeric,
         max(watts_average) as watts_max,
-        max(wkg_average) as wkg_max
-    from race_results
+        max(wkg_average) as wkg_max,
+        max(watts_average/weight) as derived_wkg_max
+    from join_race_date
     group by rider_id
 ),
 
@@ -65,4 +67,4 @@ decode_gender as (
     from add_categories
 )
 
-select rider_id, rider, gender, mixed_category, womens_category from decode_gender
+select rider_id, rider, club_id, club, watts_max, wkg_max, derived_wkg_max, gender, mixed_category, womens_category from decode_gender

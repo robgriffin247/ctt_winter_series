@@ -45,6 +45,8 @@ total_scores as (
     select 
         rider_id,
         rider,
+        club_id,
+        club,
         gender_category,
         power_category,
         sum(1) as race_count,
@@ -52,7 +54,7 @@ total_scores as (
         sum(fts_bonus) as segment_bonuses,
         sum(score) as score    
     from get_best_seven
-    group by 1, 2, 3, 4 
+    group by 1,2,3,4,5,6 
 ),
 
 -- then add in the pb bonuses per rider
@@ -79,4 +81,4 @@ add_rank as (
 )
 
 select * from add_rank
-order by power_category, gender_category, rank
+order by race_count desc, power_category, gender_category, rank
