@@ -12,6 +12,8 @@ select_columns as (
         club,
         gender,
         gender_category,
+        age_category,
+        country,
         power_category,
         watts_average,
         wkg_average,

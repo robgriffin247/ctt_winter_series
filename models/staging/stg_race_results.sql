@@ -12,6 +12,8 @@ select_type_and_rename as (
     trim(rider)::varchar as rider,
     club_id::int as club_id,
     trim(club)::varchar as club,
+    trim(age_category)::varchar as age_category,
+    trim(country)::varchar as country,
     weight::float as weight,
     gender_numeric::int as gender_numeric,
     zp_position::int as zp_position,

@@ -10,6 +10,8 @@ results as (
         rider,
         club_id,
         club,
+        age_category,
+        country,
         -- segments_rider,
         gender,
         gender_category,

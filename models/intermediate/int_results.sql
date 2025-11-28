@@ -6,6 +6,8 @@ riders as (
         rider, 
         club,
         club_id,
+        age_category,
+        country,
         gender, 
         mixed_category,
         womens_category
@@ -18,8 +20,7 @@ race_results as (
         rider_id, 
         race_seconds, 
         watts_average, 
-        wkg_average, 
-        zp_position
+        wkg_average
     from {{ref("stg_race_results")}}
 ),
 
@@ -73,6 +74,8 @@ add_rider_data as (
         riders.gender,
         riders.mixed_category,
         riders.womens_category,
+        riders.age_category,
+        riders.country,
         combine_results.watts_average,
         combine_results.wkg_average,
         combine_results.race_seconds,
@@ -144,6 +147,8 @@ select_columns as (
         rider,
         club_id,
         club,
+        country,
+        age_category,
         gender,
         gender_category,
         power_category,

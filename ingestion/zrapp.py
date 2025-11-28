@@ -48,6 +48,8 @@ def ingest_zrapp(event_id) -> LoadInfo:
             "name": "rider",
             "category": "category",
             "tname": "club",
+            "flag": "country",
+            "age": "age_category",
         }
 
         for rider in riders:
