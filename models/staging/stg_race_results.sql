@@ -14,12 +14,12 @@ select_type_and_rename as (
     trim(club)::varchar as club,
     trim(age_category)::varchar as age_category,
     trim(country)::varchar as country,
-    weight::float as weight,
+    weight::decimal as weight,
     gender_numeric::int as gender_numeric,
     zp_position::int as zp_position,
-    time_seconds::float as race_seconds,
-    watts_average::float as watts_average,
-    wkg_average::float as wkg_average,
+    time_seconds::decimal as race_seconds,
+    watts_average::int as watts_average,
+    wkg_average::decimal as wkg_average,
   from race_results
 )
 

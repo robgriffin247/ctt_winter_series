@@ -1,127 +1,179 @@
-with
+with 
 
-riders as (
-    select 
-        rider_id,
-        rider, 
-        club,
-        club_id,
-        age_category,
-        country,
-        gender, 
-        mixed_category,
-        womens_category
-    from {{ref("int_riders")}}
-),
+max_round as (select 2 as round_id),
 
-race_results as (
-    select 
-        event_id, 
-        rider_id, 
-        race_seconds, 
-        watts_average, 
-        wkg_average
-    from {{ref("stg_race_results")}}
-),
-
-fts_times as (
+stg_race_results as (
     select
-        event_id,
-        rider_id,
-        segment_seconds
-    from {{ref("int_fts_times")}}
+        *
+    from {{ ref("stg_race_results") }}
 ),
 
-rounds as (
-    select 
+stg_races as (
+    select
+        *
+    from {{ ref("stg_races") }}
+),
+
+stg_rounds as (
+    select
+        *
+    from {{ ref("stg_rounds") }}
+),
+
+int_fts_times as (
+    select
+        *
+    from {{ ref("int_fts_times") }}
+),
+
+
+-- Combine data -----------------------------------------------------------------------------------
+race_results_with_race_details as (
+    select
+        stg_race_results.*,
+        stg_races.start_datetime_utc,
+        stg_races.round_id
+    from stg_race_results left join stg_races using(event_id)
+),
+
+race_results_with_round_details as (
+    select
+        race_results_with_race_details.*,
+        stg_rounds.route_type,
+        stg_rounds.route,
+        stg_rounds.route_length,
+        stg_rounds.route_elevation
+    from race_results_with_race_details left join stg_rounds using(round_id)
+),
+
+race_results_with_segment_values as (
+    select
+        race_results_with_round_details.*,
+        int_fts_times.segment_seconds
+    from race_results_with_round_details left join int_fts_times using(event_id, rider_id)
+),
+
+input_results as (
+    select
         round_id,
         route,
-        route_type,
         route_length,
         route_elevation,
-    from {{ref("stg_rounds")}}
-),
-
-races as (
-    select
-        round_id,
+        route_type,
         event_id,
         start_datetime_utc,
-    from {{ref("stg_races")}}
+        rider_id,
+        rider,
+        case when country!='' then upper(left(country,2)) else null end as country,
+        weight,
+        case when gender_numeric=1 then 'M' when gender_numeric=0 then 'F' else null end as gender,
+        age_category,
+        club_id,
+        club,
+        watts_average,
+        wkg_average,
+        race_seconds,
+        route_length / (race_seconds/3600) as race_speed,
+        segment_seconds
+    from race_results_with_segment_values
+    where round_id <= (select round_id from max_round)
 ),
 
-races_rounds as (
+
+-- Get latest rider details -----------------------------------------------------------------------
+rider_latest_details as (
+    select
+        row_number() over (partition by rider_id order by start_datetime_utc desc)=1 as is_latest,
+        last(rider_id) over (partition by rider_id order by start_datetime_utc desc) as rider_id,
+        last(rider) over (partition by rider_id order by start_datetime_utc desc) as rider,
+        last(gender) over (partition by rider_id order by start_datetime_utc desc) as gender,
+        last(club) over (partition by rider_id order by start_datetime_utc desc) as club,
+        last(age_category) over (partition by rider_id order by start_datetime_utc desc) as age_category,
+        last(country) over (partition by rider_id order by start_datetime_utc desc) as country,
+    from input_results
+),
+
+updated_rider_details as (
     select 
-        rounds.*,
-        races.* exclude(round_id)
-    from races left join rounds using(round_id)
+        input_results.* exclude(rider, gender, club, age_category, country),
+        rider_latest_details.* exclude(rider_id)
+    from input_results left join rider_latest_details using(rider_id)
+    where rider_latest_details.is_latest
 ),
 
-combine_results as (
+-- Get rider categories ---------------------------------------------------------------------------
+rider_best_power as (
     select
-        race_results.*,
-        fts_times.segment_seconds
-    from race_results left join fts_times using(event_id, rider_id)
+        rider_id,
+        rider,
+        gender,
+        max(watts_average) as watts_max,
+        max(wkg_average) as wkg_max,
+    from updated_rider_details
+    group by all
 ),
 
-add_rider_data as (
+rider_categories as (
     select
-        combine_results.event_id,
-        combine_results.rider_id,
-        riders.rider,
-        riders.club_id,
-        riders.club,
-        riders.gender,
-        riders.mixed_category,
-        riders.womens_category,
-        riders.age_category,
-        riders.country,
-        combine_results.watts_average,
-        combine_results.wkg_average,
-        combine_results.race_seconds,
-        combine_results.segment_seconds,
-    from combine_results left join riders using(rider_id)
+        rider_id,
+        rider,
+        gender,
+        watts_max,
+        wkg_max,
+        case 
+            when watts_max>=250 and wkg_max>=4.20 then 'A'
+            when watts_max>=200 and wkg_max>=3.36 then 'B'
+            when watts_max>=150 and wkg_max>=2.63 then 'C'
+            when watts_max>0 and wkg_max>0 then 'D'
+            else null end as mixed_category,
+        case
+            when gender='F' and wkg_max>=3.88 then 'A'
+            when gender='F' and wkg_max>=3.36 then 'B'
+            when gender='F' and wkg_max>=2.63 then 'C'
+            when gender='F' and wkg_max<2.63 then 'D'
+            else null end as womens_category
+    from rider_best_power
 ),
 
-add_round_data as (
+categories_on_results as (
     select
-        races_rounds.round_id,
-        races_rounds.route,
-        races_rounds.route_type,
-        races_rounds.route_length,
-        races_rounds.route_elevation,
-        races_rounds.start_datetime_utc,
-        add_rider_data.*,
-    from add_rider_data
-        left join races_rounds using(event_id)
-),
-
-add_gender_category as (
-    (select *, 'Mixed' as gender_category, mixed_category as power_category from add_round_data)
-    union all 
-    (select *, 'Womens' as gender_category, womens_category as power_category  from add_round_data where gender='F')
-    union all 
-    (select *, 'Mens' as gender_category, mixed_category as power_category  from add_round_data where gender='M')
+        updated_rider_details.*,
+        rider_categories.mixed_category,
+        rider_categories.womens_category,
+        rider_categories.watts_max,
+        rider_categories.wkg_max
+    from updated_rider_details left join rider_categories using(rider_id)
 ),
 
 
--- Add PBs marker (divide on gender category!)
+-- Mark riders fastest ride per round -------------------------------------------------------------
+identified_best_race_per_round as (
+    select
+        *,
+        row_number() over (partition by round_id, rider_id order by race_seconds)=1 as is_best_effort_in_round
+    from categories_on_results
+),
+
+
+-- Mark riders new PBs ----------------------------------------------------------------------------
 mark_pbs as (
     select *,
         case 
-            when coalesce(lag(race_seconds) over (partition by rider_id, route, gender_category order by start_datetime_utc), race_seconds) > race_seconds then race_seconds 
-            else coalesce(lag(race_seconds) over (partition by rider_id, route, gender_category order by start_datetime_utc), race_seconds) 
+            when coalesce(lag(race_seconds) over (partition by rider_id, route order by start_datetime_utc), race_seconds) > race_seconds 
+                then race_seconds 
+            else coalesce(lag(race_seconds) over (partition by rider_id, route order by start_datetime_utc), race_seconds) 
             end as pb,
         case 
-            when coalesce(lag(race_seconds) over (partition by rider_id, route, gender_category order by start_datetime_utc), race_seconds) > race_seconds then true 
+            when coalesce(lag(race_seconds) over (partition by rider_id, route order by start_datetime_utc), race_seconds) > race_seconds 
+                then true 
             else false
-            end as new_pb
-    from add_gender_category   
+            end as is_new_pb
+    from identified_best_race_per_round   
 ),
 
+-- Formatting -------------------------------------------------------------------------------------
 add_times as (
     select *, 
-        route_length / (race_seconds / 3600) as race_speed,
         printf('%02d:%02d:%05.2f', 
             cast(floor(race_seconds / 3600) as integer),
             cast(floor((race_seconds % 3600) / 60) as integer),
@@ -134,34 +186,12 @@ add_times as (
     from mark_pbs
 ),
 
-select_columns as (
-    select
-        round_id,
-        route,
-        route_length,
-        route_elevation,
-        route_type,
-        event_id,
-        start_datetime_utc,
-        rider_id,
-        rider,
-        club_id,
-        club,
-        country,
-        age_category,
-        gender,
-        gender_category,
-        power_category,
-        watts_average,
-        wkg_average,
-        race_seconds,
-        race_speed,
-        race_time,
-        new_pb,
-        segment_seconds,
-        segment_time
+joined_category as (
+    select *,
+        case when womens_category is not null then mixed_category || ' (' || womens_category || ')' else mixed_category end as categories
     from add_times
 )
 
-select * from select_columns
-where round_id<=2
+select * 
+from joined_category
+order by start_datetime_utc, race_seconds
