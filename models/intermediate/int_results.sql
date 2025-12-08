@@ -1,7 +1,5 @@
 with 
 
-max_round as (select 2 as round_id),
-
 stg_race_results as (
     select
         *
@@ -42,20 +40,26 @@ race_results_with_round_details as (
         stg_rounds.route_type,
         stg_rounds.route,
         stg_rounds.route_length,
-        stg_rounds.route_elevation
+        stg_rounds.route_elevation,
+        stg_rounds.segment,
+        stg_rounds.segment_length,
+        stg_rounds.round_completed
     from race_results_with_race_details left join stg_rounds using(round_id)
 ),
 
 race_results_with_segment_values as (
     select
         race_results_with_round_details.*,
-        int_fts_times.segment_seconds
+        int_fts_times.segment_seconds, 
+        int_fts_times.segment_watts,
+        int_fts_times.segment_wkg
     from race_results_with_round_details left join int_fts_times using(event_id, rider_id)
 ),
 
 input_results as (
     select
         round_id,
+        round_completed,
         route,
         route_length,
         route_elevation,
@@ -74,9 +78,12 @@ input_results as (
         wkg_average,
         race_seconds,
         route_length / (race_seconds/3600) as race_speed,
-        segment_seconds
+        segment,
+        segment_seconds,
+        segment_length / (segment_seconds/3600) as segment_speed,
+        segment_watts,
+        segment_wkg
     from race_results_with_segment_values
-    where round_id <= (select round_id from max_round)
 ),
 
 
@@ -179,10 +186,11 @@ add_times as (
             cast(floor((race_seconds % 3600) / 60) as integer),
             race_seconds % 60
         ) AS race_time, 
-        printf('%02d:%05.2f', 
-            cast(floor((segment_seconds % 3600) / 60) as integer),
-            segment_seconds % 60
-        ) AS segment_time
+        case when segment_seconds<6000 then 
+            printf('%02d:%05.2f', 
+                cast(floor(segment_seconds / 60) as integer),
+                segment_seconds % 60
+            ) else '>=100 mins' end as segment_time
     from mark_pbs
 ),
 

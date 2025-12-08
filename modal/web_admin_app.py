@@ -5,8 +5,8 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-app_local_path = PROJECT_ROOT / "streamlit" / "app.py"
-app_remote_path = "/root/ui/app.py"
+app_local_path = PROJECT_ROOT / "streamlit" / "admin_app.py"
+app_remote_path = "/root/ui/admin_app.py"
 
 image = (
     modal.Image.debian_slim()
@@ -14,15 +14,14 @@ image = (
     .add_local_dir(PROJECT_ROOT / "streamlit", "/root/ui")
     .add_local_dir(PROJECT_ROOT / ".streamlit", "/root/.streamlit")
     .add_local_file(app_local_path, app_remote_path)
-    .add_local_file(PROJECT_ROOT / "streamlit/tabs.py", "/root/ui/tabs.py")
     .add_local_file(PROJECT_ROOT / ".streamlit/config.toml", "/root/.streamliy/config.toml")
 )
 
-app = modal.App("ctt-winter-series-2025-26", image=image)
+app = modal.App("ctt-winter-series-2025-26-results-admin-dashboard", image=image)
 
 
 @app.function(secrets=[modal.Secret.from_name("ctt-secrets")])
-@modal.concurrent(max_inputs=10)
+@modal.concurrent(max_inputs=250)
 @modal.web_server(8000)
 def host_web_app():
     cmd = f"streamlit run {app_remote_path} --server.port 8000 --server.enableCORS=false --server.enableXsrfProtection=false"

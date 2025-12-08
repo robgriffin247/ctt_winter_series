@@ -1,6 +1,6 @@
 The transformation layer takes distributed raw data and combines and transforms it into production-ready data.
 
-- Staging is to take raw data into staging layer, setting column names, data types and selecting columns.
+- Staging is to take raw data and seeds into staging layer, setting column names, data types and selecting columns.
 - Intermediate is the major transformation layer, with joins, decoding, derivations.
 - Core is the production-ready layer; selecting columns and sorting rows needed to produce analytics outputs
 
