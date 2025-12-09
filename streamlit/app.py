@@ -4,14 +4,15 @@ from tabs import render_standings, render_results, render_stats, render_schedule
 import os
 
 if os.getenv("TARGET") == "test":
-    db = "data/ctt_winter_series_test.duckdb"
-if os.getenv("TARGET") == "dev":
-    db = f"md:ctt_winter_series_dev"
-if os.getenv("TARGET") == "prod":
-    db = f"md:ctt_winter_series_prod"
+    DB_PATH = "data/ctt_winter_series_test.duckdb"
+elif os.getenv("TARGET") == "dev":
+    DB_PATH = f"md:ctt_winter_series_dev"
+else:
+    DB_PATH = f"md:ctt_winter_series_prod"
 
-st.set_page_config(#layout="wide",
-    page_title="CTT Winter Series 2025/26", page_icon=":bike:"
+st.set_page_config(
+    page_title="CTT Winter Series 2025/26", 
+    page_icon=":bike:"
 )
 
 st.html("""
@@ -40,29 +41,31 @@ st.html("""
 </style>
 """)
 
+@st.cache_resource
+def get_db_connection():
+    return duckdb.connect(DB_PATH, read_only=True)
 
 @st.cache_data(
     ttl=4 * 60 * 60,
-    max_entries=100,
+    max_entries=10,
     show_spinner="Loading data from database...",
 )
 def load_data():
-    with duckdb.connect(db) as con:
-        results = con.sql("select * from core.obt_results").pl()
-        rounds = con.sql("select * from core.fct_rounds").pl()
-        winners = con.sql("select * from core.fct_winners").pl()
+    con = get_db_connection()
+    results = con.sql("select * from core.obt_results").pl()
+    rounds = con.sql("select * from core.fct_rounds").pl()
+    winners = con.sql("select * from core.fct_winners").pl()
 
     return [results, rounds, winners]
 
 
 
 st.markdown("")
-
 st.title("CTT Winter Series 2025/26")
 
-#st.write(os.getenv("TARGET"))
-
-standings_tab, results_tab, stats_tab, schedule_tab = st.tabs(["Standings", "Race Efforts", "Stats", "Rounds"])
+standings_tab, results_tab, stats_tab, schedule_tab = st.tabs(
+        ["Standings", "Race Efforts", "Stats", "Rounds"]
+)
 
 results, rounds, winners = load_data()
 
