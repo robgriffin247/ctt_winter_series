@@ -53,8 +53,8 @@ app = modal.App("ctt-winter-series-2025-26", image=image)
     secrets=[modal.Secret.from_name("ctt-secrets")],
     memory=1024,  # 4GB - adjust based on your data size
     cpu=2.0,  # 2 CPUs for handling concurrent users
-    timeout=600,  # 10 minutes for long-running sessions
-    scaledown_window=900,  # Keep containers alive 15 min after last request
+    timeout=300,  # 10 minutes for long-running sessions
+    scaledown_window=600,  # Keep containers alive 15 min after last request
 )
 @modal.concurrent(max_inputs=1000)
 @modal.web_server(8000, startup_timeout=60)

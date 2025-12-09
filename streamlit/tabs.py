@@ -413,12 +413,14 @@ def render_stats(results):
     c2.metric("Efforts 🏁", f"{results.shape[0]:,.0f}", border=True)
     c3.metric("PBs 🏆", f"{sum(results["is_new_pb"]):,.0f}", border=True)
     
+    c1, c2, c3 = st.columns(3)
     c1.metric("Distance 🌍", f"{distance:,.0f} km", border=True)
     c2.metric("Hours ⏱️", f"{hours:,.0f}", border=True)
     #c3.metric("Speed 🚀", f"{distance/hours:,.1f} km/h", border=True)
     #c3.metric("Elevation 🏔️", f"{sum(summaries_data["route_elevation"]):,.0f} m", border=True)
     c3.metric("Everests Climbed 🏔️", f"{sum(results["route_elevation"])/8848:,.2f}", border=True)
     
+    c1, c2, c3 = st.columns(3)
     c1.metric("Energy Generated ⚡", f"{kwhs:,.0f} kW/h", border=True)
     c2.metric("Calories Burned 🔥", f"{kwhs * 860.420 / 0.24:,.0f}", border=True)
     c3.metric("Pizza Slices 🍕", f"{kwhs * 860.420 / 0.24 / 266:,.0f}", border=True)

@@ -3,6 +3,8 @@ import duckdb
 from tabs import render_standings, render_results, render_stats, render_schedule
 import os
 
+
+
 if os.getenv("TARGET") == "test":
     DB_PATH = "data/ctt_winter_series_test.duckdb"
 elif os.getenv("TARGET") == "dev":
@@ -16,6 +18,18 @@ st.set_page_config(
 )
 
 st.html("""
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-B2BP25LC1S"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-B2BP25LC1S');
+</script>
+</head>
+
 <style>
         .stMainBlockContainer, stVerticalBlock {
             width: 95% !important;
@@ -45,8 +59,10 @@ st.html("""
 def get_db_connection():
     return duckdb.connect(DB_PATH, read_only=True)
 
+cache_data_days = 7
+
 @st.cache_data(
-    ttl=4 * 60 * 60,
+    ttl=cache_data_days * 24 * 60 * 60,
     max_entries=10,
     show_spinner="Loading data from database...",
 )
