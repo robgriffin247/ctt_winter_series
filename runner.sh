@@ -64,13 +64,13 @@ for i in "${!items[@]}"; do
     if [ $i -lt $((${#items[@]} - 1)) ]; then
         end_time=$(date +%s)
         elapsed=$((end_time - start_time))
-        sleep_time=$((66 - elapsed))
+        sleep_time=$((70 - elapsed))
         
         if [ $sleep_time -gt 0 ]; then
             echo "Sleeping for $sleep_time seconds..."
             sleep $sleep_time
         else
-            echo "Execution took $elapsed seconds (>60s), no sleep needed"
+            echo "Execution took $elapsed seconds (>70), no sleep needed"
         fi
     fi
 done

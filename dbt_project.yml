@@ -22,6 +22,9 @@ models:
     core:
       +schema: core
       +materialized: table
+    analytics:
+      +schema: analytics
+      +materialized: incremental
 
 seeds:
   ctt_winter_series:  

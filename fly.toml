@@ -1,19 +1,15 @@
-# fly.toml app configuration file generated for ctt-winter-series on 2025-11-26T09:35:24+01:00
-#
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
-
+# fly.toml app configuration file
 app = 'ctt-winter-series'
-primary_region = 'arn'
+primary_region = 'lhr'  # Changed to London for UK users (was: 'arn')
 
 [build]
 
 [http_service]
   internal_port = 8501
   force_https = true
-  auto_stop_machines = false
+  auto_stop_machines = 'suspend'  # 'suspend' or false
   auto_start_machines = true
-  min_machines_running = 1
+  min_machines_running = 0       #  0 or 1
   processes = ['app']
 
 [http_service.concurrency]
@@ -21,8 +17,12 @@ primary_region = 'arn'
   soft_limit = 200
   hard_limit = 250
 
+# This controls the idle timeout; default for fly will be around 5 minutes, so use this to keep containers warm longer
+[[http_service.machine]]
+  timeout_seconds = 900 
+
 [[vm]]
-  memory = '512mb' # scale to 1gb if needed
+  memory = '512mb'
   cpu_kind = 'shared'
   cpus = 1
 
@@ -30,5 +30,5 @@ primary_region = 'arn'
   grace_period = "30s"
   interval = "30s"
   method = "GET"
-  timeput = "10s"
+  timeout = "10s"
   path = "/_stcore/health"

@@ -244,7 +244,7 @@ def render_results(results):
                     This table shows every effort from across the series; you can find your round-bests (RB; the fastest attempts per round, those that determine your score for the round).
                     """)
 
-def render_stats(results):
+def render_stats(results, christmas=False):
 
     def power_figure(data):
 
@@ -406,24 +406,34 @@ def render_stats(results):
     distance = sum(results["route_length"])
     hours = sum(results["race_seconds"])/3600
     kwhs = sum((results["watts_average"]/1000) * (results["race_seconds"]/3600))
-    
+
     st.markdown("")
     c1, c2, c3 = st.columns(3)
-    c1.metric("Riders 🚴‍♂️", f"{results[["rider_id"]].unique().shape[0]:,.0f}", border=True)
-    c2.metric("Efforts 🏁", f"{results.shape[0]:,.0f}", border=True)
-    c3.metric("PBs 🏆", f"{sum(results["is_new_pb"]):,.0f}", border=True)
-    
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Distance 🌍", f"{distance:,.0f} km", border=True)
-    c2.metric("Hours ⏱️", f"{hours:,.0f}", border=True)
-    #c3.metric("Speed 🚀", f"{distance/hours:,.1f} km/h", border=True)
-    #c3.metric("Elevation 🏔️", f"{sum(summaries_data["route_elevation"]):,.0f} m", border=True)
-    c3.metric("Everests Climbed 🏔️", f"{sum(results["route_elevation"])/8848:,.2f}", border=True)
-    
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Energy Generated ⚡", f"{kwhs:,.0f} kW/h", border=True)
-    c2.metric("Calories Burned 🔥", f"{kwhs * 860.420 / 0.24:,.0f}", border=True)
-    c3.metric("Pizza Slices 🍕", f"{kwhs * 860.420 / 0.24 / 266:,.0f}", border=True)
+    c4, c5, c6 = st.columns(3)
+    c7, c8, c9 = st.columns(3)
+
+    if christmas:
+        c1.metric("Santas 🎅", f"{results[["rider_id"]].unique().shape[0]:,.0f}", border=True, help="Riders")
+        c2.metric("Sleds Raced 🛷", f"{results.shape[0]:,.0f}", border=True, help="Efforts")
+        c3.metric("Gifts Received 🎁", f"{sum(results["is_new_pb"]):,.0f}", border=True, help="PBs beaten")
+        c4.metric("Sleigh Rides Around the World 🌍", f"{distance/40075:,.2f}", border=True, help=f"{distance:,.0f} km")
+        #c5.metric("Christmas Days ⏱️", f"{hours/24:,.2f}", border=True, help="Cumulative days of riding")
+        c5.metric("Die Hard Showings 🎬", f"{hours*60/132:,.1f}", border=True, help=f"{hours:,.0f} cumulative hours of riding; Christmas cracker Die Hard is 2h 12m")
+        c6.metric("Mt Gunnbjørns Climbed 🏔️", f"{sum(results["route_elevation"])/3694:,.1f}", border=True, help=f"{sum(results["route_elevation"]):,.0f} meters climbed; Mt Gunnbjørn his the highest peak in the Arctic Circle at 3694 metres above sea level")
+        c7.metric("Christmas Lights Lit 🎄", f"{kwhs/(5.65/100):,.0f} m", border=True, help=f"{kwhs:.0f} kW/hs; based on 7.6 W per 100 metres for all of December") # 5.65 per 100m; 5.65/100 = per metre
+        c8.metric("Logs Burned 🔥", f"{kwhs * 860.420 / 0.24 / 1900:,.1f} kg", border=True, help=f"{kwhs * 860.420 / 0.24:,.0f} calories") # 1900 cal/kg
+        c9.metric("Turkey Legs Eaten 🍗", f"{kwhs * 860.420 / 0.24 / 416:,.0f}", border=True, help=f"{kwhs * 860.420 / 0.24 / 266:,.0f} pizza slices")
+
+    else:
+        c1.metric("Riders 🚴‍♂️", f"{results[["rider_id"]].unique().shape[0]:,.0f}", border=True)
+        c2.metric("Efforts 🏁", f"{results.shape[0]:,.0f}", border=True)
+        c3.metric("PBs 🏆", f"{sum(results["is_new_pb"]):,.0f}", border=True)
+        c4.metric("Distance 🌍", f"{distance:,.0f} km", border=True)
+        c5.metric("Hours ⏱️", f"{hours:,.0f}", border=True)
+        c6.metric("Everests Climbed 🏔️", f"{sum(results["route_elevation"])/8848:,.2f}", border=True)
+        c7.metric("Energy Generated ⚡", f"{kwhs:,.0f} kW/h", border=True)
+        c8.metric("Calories Burned 🔥", f"{kwhs * 860.420 / 0.24:,.0f}", border=True)
+        c9.metric("Pizza Slices 🍕", f"{kwhs * 860.420 / 0.24 / 266:,.0f}", border=True)
     
     power_figure(results)
     world_map(results)
