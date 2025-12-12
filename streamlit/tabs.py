@@ -208,7 +208,7 @@ def render_results(results):
     if results.shape[0]==0:
         st.write("Uh oh! No data found &mdash; try a different combination!")
     else:
-        st.dataframe(results[["round_id", "rider", "club", "country", "gender", "age_category", "categories", "watts_average", "wkg_average", "race_time", "race_speed", "is_best_effort_in_round", "is_new_pb", "segment_time", "start_datetime_utc", "route"]].sort([pl.col("round_id"), pl.col("start_datetime_utc"), pl.col("race_speed")], descending=[False, False, True]),
+        st.dataframe(results[["round_id", "rider", "club", "country", "gender", "age_category", "categories", "watts_average", "wkg_average", "race_time", "race_speed", "is_best_effort_in_round", "is_new_pb", "segment_time", "start_datetime_utc", "route"]].sort([pl.col("round_id"), pl.col("race_speed")], descending=[False, True]),
                     column_config={
                         "round_id":st.column_config.NumberColumn("Round", pinned=True),
                         "rider":st.column_config.TextColumn("Rider", pinned=True),
