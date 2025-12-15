@@ -71,7 +71,7 @@ st.title("CTT Winter Series 2025/26")
 
 if os.getenv("APP")=="modal":
     st.error("Please note, we have moved the results app from modal to [**fly**](https://ctt-winter-series.fly.dev) &mdash; the modal site will not be maintained as routinely as fly, and will shut down in the future, so head over to fly to make sure you stay up to date!")
-    time.sleep(2)
+    time.sleep(5)
 
 standings_tab, results_tab, stats_tab, schedule_tab = st.tabs(
         ["Standings", "Race Efforts", "Stats", "Rounds"]

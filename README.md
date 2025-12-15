@@ -55,3 +55,18 @@ Deploy the apps using
 - ``uv run modal deploy modal/web_admin_app.py`` for the organisers analytics app
 
 Adjust configs for the fly app in ``fly.toml`` and modal app in ``modal/web_admin_app.py``.
+
+
+#### ToDo
+
+- [ ] Add last load details
+- [ ] Migrate analytics app to main app (using streamlit pages)
+    - Move main app to a page
+    - Move analytics app to a page
+    - Add pages control to app.py; sidebar with password
+    - Shrink modal to very basic leaderboard
+- [ ] Add date of loading to results
+    - I think DQd riders may remain as it stands (merge write-disposition)
+    - Want only those in the most recent load per event
+- [ ] Check what will happen when seven races complete
+    - Does leaderboard limit to seven?
