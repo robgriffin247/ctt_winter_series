@@ -1,9 +1,8 @@
 import streamlit as st
 import duckdb
-from tabs import render_standings, render_results, render_stats, render_schedule
 import os
 import time
-
+from datetime import datetime as dt
 
 if os.getenv("TARGET") == "test":
     DB_PATH = "data/ctt_winter_series_test.duckdb"
@@ -62,34 +61,32 @@ def load_data():
     results = con.sql("select * from core.obt_results").pl()
     rounds = con.sql("select * from core.fct_rounds").pl()
     winners = con.sql("select * from core.fct_winners").pl()
+    latest_data = con.sql("select /*to_timestamp(max(_dlt_load_id::int))*/ max(_dlt_load_id::int) as x from zrapp.results").pl()["x"][0]
 
-    return [results, rounds, winners]
+    return [results, rounds, winners, latest_data]
 
 
 st.markdown("")
 st.title("CTT Winter Series 2025/26")
 
-if os.getenv("APP")=="modal":
-    st.error("Please note, we have moved the results app from modal to [**fly**](https://ctt-winter-series.fly.dev) &mdash; the modal site will not be maintained as routinely as fly, and will shut down in the future, so head over to fly to make sure you stay up to date!")
-    time.sleep(5)
+st.session_state["results"], st.session_state["rounds"], st.session_state["winners"], latest_data = load_data()
 
-standings_tab, results_tab, stats_tab, schedule_tab = st.tabs(
-        ["Standings", "Race Efforts", "Stats", "Rounds"]
-)
 
-results, rounds, winners = load_data()
+results_page = st.Page("pages/public_results.py", title="Results", icon=":material/trophy:")
+series_analytics_page = st.Page("pages/series_analytics.py", title="Admin", icon=":material/bar_chart:")
 
-with standings_tab:
-    render_standings(results)
+pg = st.navigation([results_page, series_analytics_page])
 
-with results_tab:
-    render_results(results)
 
-with stats_tab:
-    render_stats(results, christmas=False)
 
-with schedule_tab:
-    render_schedule(rounds, winners)
+st.sidebar.markdown(f"Data last updated at {dt.fromtimestamp(latest_data).strftime("%H:%m on %d/%m/%Y")}")
+
+
+
+
+pg.run()
+
+
 
 
 # At the end to allow the rest of the page to load - this is just a background process and priority is on ux
