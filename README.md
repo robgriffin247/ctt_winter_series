@@ -13,7 +13,7 @@ All best efforts over the round are then ranked and points awarded accordingly &
     
 The rider with the lowest score wins.
 
-Raw data from two APIs is loaded to DuckDB/Motherduck, transformed with dbt and visualised using Streamlit in a [results app](https://ctt-winter-series.fly.dev) (for competitors) and series analytics app (for organisers), hosted on fly.io and modal respectively. 
+Raw data from two APIs is loaded to DuckDB/Motherduck, transformed with dbt and visualised using Streamlit in a [results app](https://ctt-winter-series.fly.dev) hosted on fly.io. 
 
 
 Modelling involves:
@@ -49,22 +49,15 @@ Use the ``runner.sh`` script to ingest data; it handles dlt and dbt for the give
 - Running ``uv run bash runner.sh 123456789`` will ingest event with ID ``123456789``
 - Running ``uv run bash runner.sh -r 1`` will ingest all events from round 1
 
-Deploy the apps using
+Deploy the app using
 
 - ``uv run fly deploy`` for the results users app
-- ``uv run modal deploy modal/web_admin_app.py`` for the organisers analytics app
 
-Adjust configs for the fly app in ``fly.toml`` and modal app in ``modal/web_admin_app.py``.
+Adjust configs for the app in ``fly.toml``.
 
 
 #### ToDo
 
-- [ ] Add last load details
-- [ ] Migrate analytics app to main app (using streamlit pages)
-    - Move main app to a page
-    - Move analytics app to a page
-    - Add pages control to app.py; sidebar with password
-    - Shrink modal to very basic leaderboard
 - [ ] Add date of loading to results
     - I think DQd riders may remain as it stands (merge write-disposition)
     - Want only those in the most recent load per event
