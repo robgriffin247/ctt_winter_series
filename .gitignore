@@ -5,6 +5,8 @@ logs/
 target/
 streamlit/__pycache__/tabs.cpython-312.pyc 
 
+*.pyc
+
 _streamlit
 _modal
 _hidden
