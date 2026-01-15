@@ -14,7 +14,8 @@ import html
 def ingest_zrapp(event_id) -> LoadInfo:
 
     header = {"Authorization": os.getenv("ZRAPP_API_KEY")}
-    url = f"https://zwift-ranking.herokuapp.com/public/"  # /zp/{id}/results
+    # url = f"https://zwift-ranking.herokuapp.com/public/"  # /zp/{id}/results
+    url = f"https://api.zwiftracing.app/api/public/"  # /zp/{id}/results
 
     @dlt.resource(
         name="results", write_disposition="merge", primary_key="unique_event_rider_id"

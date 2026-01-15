@@ -162,7 +162,7 @@ def render_standings(results):
 def render_results(results):
     st.markdown("")
     c1, c2, c3, c4 = st.columns(4)
-    c5, c6, c7 = st.columns([2,3,2])
+    c5, c6, c7, c8 = st.columns([2,3,2,2], vertical_alignment="bottom")
     st.markdown("")
     st.markdown("")
 
@@ -203,7 +203,9 @@ def render_results(results):
     if rounds!=[]:
         results = results.filter(pl.col("round_id").is_in(rounds))
 
-
+    
+    if c8.toggle("Round Bests Only", value=True):
+        results = results.filter(pl.col("is_best_effort_in_round")==True)
 
     if results.shape[0]==0:
         st.write("Uh oh! No data found &mdash; try a different combination!")
@@ -323,6 +325,7 @@ def render_stats(results, christmas=False):
                 "race_seconds": "Time (seconds)",
                 "race_speed": "Speed (km/h)",
                 "segment_speed": "Speed (km/h)",
+                "segment_seconds": "Time (seconds)",
                 "mixed_category": "Category",
                 "gender": "Gender",
                 "route": "Route",
@@ -412,7 +415,17 @@ def render_stats(results, christmas=False):
     c4, c5, c6 = st.columns(3)
     c7, c8, c9 = st.columns(3)
 
-    if christmas:
+    if not christmas or st.toggle("Bah! I don't like christmas!", value=False):
+        c1.metric("Riders 🚴‍♂️", f"{results[["rider_id"]].unique().shape[0]:,.0f}", border=True)
+        c2.metric("Efforts 🏁", f"{results.shape[0]:,.0f}", border=True)
+        c3.metric("PBs 🏆", f"{sum(results["is_new_pb"]):,.0f}", border=True)
+        c4.metric("Distance 🌍", f"{distance:,.0f} km", border=True)
+        c5.metric("Hours ⏱️", f"{hours:,.0f}", border=True)
+        c6.metric("Everests Climbed 🏔️", f"{sum(results["route_elevation"])/8848:,.2f}", border=True)
+        c7.metric("Energy Generated ⚡", f"{kwhs:,.0f} kW/h", border=True)
+        c8.metric("Calories Burned 🔥", f"{kwhs * 860.420 / 0.24:,.0f}", border=True)
+        c9.metric("Pizza Slices 🍕", f"{kwhs * 860.420 / 0.24 / 266:,.0f}", border=True)
+    else:
         c1.metric("Santas 🎅", f"{results[["rider_id"]].unique().shape[0]:,.0f}", border=True, help="Riders")
         c2.metric("Sleds Raced 🛷", f"{results.shape[0]:,.0f}", border=True, help="Efforts")
         c3.metric("Gifts Received 🎁", f"{sum(results["is_new_pb"]):,.0f}", border=True, help="PBs beaten")
@@ -424,16 +437,6 @@ def render_stats(results, christmas=False):
         c8.metric("Logs Burned 🔥", f"{kwhs * 860.420 / 0.24 / 1900:,.1f} kg", border=True, help=f"{kwhs * 860.420 / 0.24:,.0f} calories") # 1900 cal/kg
         c9.metric("Turkey Legs Eaten 🍗", f"{kwhs * 860.420 / 0.24 / 416:,.0f}", border=True, help=f"{kwhs * 860.420 / 0.24 / 266:,.0f} pizza slices")
 
-    else:
-        c1.metric("Riders 🚴‍♂️", f"{results[["rider_id"]].unique().shape[0]:,.0f}", border=True)
-        c2.metric("Efforts 🏁", f"{results.shape[0]:,.0f}", border=True)
-        c3.metric("PBs 🏆", f"{sum(results["is_new_pb"]):,.0f}", border=True)
-        c4.metric("Distance 🌍", f"{distance:,.0f} km", border=True)
-        c5.metric("Hours ⏱️", f"{hours:,.0f}", border=True)
-        c6.metric("Everests Climbed 🏔️", f"{sum(results["route_elevation"])/8848:,.2f}", border=True)
-        c7.metric("Energy Generated ⚡", f"{kwhs:,.0f} kW/h", border=True)
-        c8.metric("Calories Burned 🔥", f"{kwhs * 860.420 / 0.24:,.0f}", border=True)
-        c9.metric("Pizza Slices 🍕", f"{kwhs * 860.420 / 0.24 / 266:,.0f}", border=True)
     
     power_figure(results)
     world_map(results)

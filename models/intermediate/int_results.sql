@@ -91,12 +91,12 @@ input_results as (
 rider_latest_details as (
     select
         row_number() over (partition by rider_id order by start_datetime_utc desc)=1 as is_latest,
-        last(rider_id) over (partition by rider_id order by start_datetime_utc desc) as rider_id,
-        last(rider) over (partition by rider_id order by start_datetime_utc desc) as rider,
-        last(gender) over (partition by rider_id order by start_datetime_utc desc) as gender,
-        last(club) over (partition by rider_id order by start_datetime_utc desc) as club,
-        last(age_category) over (partition by rider_id order by start_datetime_utc desc) as age_category,
-        last(country) over (partition by rider_id order by start_datetime_utc desc) as country,
+        last(rider_id) over (partition by rider_id order by start_datetime_utc) as rider_id,
+        last(rider) over (partition by rider_id order by start_datetime_utc) as rider,
+        last(gender) over (partition by rider_id order by start_datetime_utc) as gender,
+        last(club) over (partition by rider_id order by start_datetime_utc) as club,
+        first(age_category) over (partition by rider_id order by start_datetime_utc) as age_category,
+        last(country) over (partition by rider_id order by start_datetime_utc) as country,
     from input_results
 ),
 
