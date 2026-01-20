@@ -2,7 +2,9 @@ with
 
 stg_race_results as (
     select
-        *
+        * exclude(age_category, weight),
+        case when weight = 0 then null else weight end as weight,
+        case when age_category='-' or age_category='' then null else age_category end as age_category
     from {{ ref("stg_race_results") }}
 ),
 
@@ -86,18 +88,32 @@ input_results as (
     from race_results_with_segment_values
 ),
 
-
 -- Get latest rider details -----------------------------------------------------------------------
-rider_latest_details as (
+most_rider_latest_details as (
     select
         row_number() over (partition by rider_id order by start_datetime_utc desc)=1 as is_latest,
         last(rider_id) over (partition by rider_id order by start_datetime_utc) as rider_id,
         last(rider) over (partition by rider_id order by start_datetime_utc) as rider,
         last(gender) over (partition by rider_id order by start_datetime_utc) as gender,
         last(club) over (partition by rider_id order by start_datetime_utc) as club,
-        first(age_category) over (partition by rider_id order by start_datetime_utc) as age_category,
+        -- first(age_category) over (partition by rider_id order by start_datetime_utc) as age_category,
         last(country) over (partition by rider_id order by start_datetime_utc) as country,
     from input_results
+),
+
+first_age_category as (
+    select 
+        row_number() over (partition by rider_id order by start_datetime_utc)=1 as is_first,
+        last(rider_id) over (partition by rider_id order by start_datetime_utc) as rider_id,
+        first(age_category) over (partition by rider_id order by start_datetime_utc) as age_category
+    from input_results
+    where age_category is not null
+),
+
+rider_latest_details as (
+    select most_rider_latest_details.*, first_age_category.age_category
+    from most_rider_latest_details left join first_age_category using(rider_id)
+    where most_rider_latest_details.is_latest and first_age_category.is_first
 ),
 
 updated_rider_details as (
@@ -105,7 +121,7 @@ updated_rider_details as (
         input_results.* exclude(rider, gender, club, age_category, country),
         rider_latest_details.* exclude(rider_id)
     from input_results left join rider_latest_details using(rider_id)
-    where rider_latest_details.is_latest
+    --where rider_latest_details.is_latest
 ),
 
 -- Get rider categories ---------------------------------------------------------------------------
