@@ -89,39 +89,34 @@ input_results as (
 ),
 
 -- Get latest rider details -----------------------------------------------------------------------
-most_rider_latest_details as (
+rider_profiles as (
     select
-        row_number() over (partition by rider_id order by start_datetime_utc desc)=1 as is_latest,
-        last(rider_id) over (partition by rider_id order by start_datetime_utc) as rider_id,
+        rider_id,
         last(rider) over (partition by rider_id order by start_datetime_utc) as rider,
-        last(gender) over (partition by rider_id order by start_datetime_utc) as gender,
-        last(club) over (partition by rider_id order by start_datetime_utc) as club,
-        -- first(age_category) over (partition by rider_id order by start_datetime_utc) as age_category,
-        last(country) over (partition by rider_id order by start_datetime_utc) as country,
+        last(gender ignore nulls) over (partition by rider_id order by start_datetime_utc) as gender,
+        last(club ignore nulls) over (partition by rider_id order by start_datetime_utc) as club,
+        last(country ignore nulls) over (partition by rider_id order by start_datetime_utc) as country,
+        first(age_category ignore nulls) over (partition by rider_id order by start_datetime_utc) as age_category,
+        row_number() over (partition by rider_id order by start_datetime_utc desc)=1 as is_keep
     from input_results
+    where rider is not null
 ),
 
-first_age_category as (
-    select 
-        row_number() over (partition by rider_id order by start_datetime_utc)=1 as is_first,
-        last(rider_id) over (partition by rider_id order by start_datetime_utc) as rider_id,
-        first(age_category) over (partition by rider_id order by start_datetime_utc) as age_category
-    from input_results
-    where age_category is not null
+latest_profile as (
+    select * exclude(is_keep) from rider_profiles where is_keep
 ),
 
-rider_latest_details as (
-    select most_rider_latest_details.*, first_age_category.age_category
-    from most_rider_latest_details left join first_age_category using(rider_id)
-    where most_rider_latest_details.is_latest and first_age_category.is_first
-),
 
 updated_rider_details as (
-    select 
-        input_results.* exclude(rider, gender, club, age_category, country),
-        rider_latest_details.* exclude(rider_id)
-    from input_results left join rider_latest_details using(rider_id)
-    --where rider_latest_details.is_latest
+    select
+        input_results.* exclude(rider, gender, club, country, age_category),
+        latest_profile.rider,
+        latest_profile.gender,
+        latest_profile.club,
+        latest_profile.country,
+        latest_profile.age_category
+    from input_results
+        left join latest_profile using(rider_id)
 ),
 
 -- Get rider categories ---------------------------------------------------------------------------

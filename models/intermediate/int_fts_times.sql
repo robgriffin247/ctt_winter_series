@@ -11,7 +11,7 @@ select_columns as (
             when event_id in (select event_id from races where round_id in (3, 7)) then msec___1
             when event_id in (select event_id from races where round_id in (4)) then msec___20
             when event_id in (select event_id from races where round_id in (8, 12)) then msec___3
-            when event_id in (select event_id from races where round_id in (9, 13)) then null
+            when event_id in (select event_id from races where round_id in (9, 13)) then msec___76
             when event_id in (select event_id from races where round_id in (10, 14)) then null
             when event_id in (select event_id from races where round_id in (11)) then null
             else null end as segment_seconds,
@@ -21,7 +21,7 @@ select_columns as (
             when event_id in (select event_id from races where round_id in (3, 7)) then watts___1
             when event_id in (select event_id from races where round_id in (4)) then watts___20
             when event_id in (select event_id from races where round_id in (8, 12)) then watts___3
-            when event_id in (select event_id from races where round_id in (9, 13)) then null
+            when event_id in (select event_id from races where round_id in (9, 13)) then watts___76
             when event_id in (select event_id from races where round_id in (10, 14)) then null
             when event_id in (select event_id from races where round_id in (11)) then null
             else null end as segment_watts,
@@ -31,7 +31,7 @@ select_columns as (
             when event_id in (select event_id from races where round_id in (3, 7)) then wkg___1
             when event_id in (select event_id from races where round_id in (4)) then wkg___20
             when event_id in (select event_id from races where round_id in (8, 12)) then wkg___3
-            when event_id in (select event_id from races where round_id in (9, 13)) then null
+            when event_id in (select event_id from races where round_id in (9, 13)) then wkg___76
             when event_id in (select event_id from races where round_id in (10, 14)) then null
             when event_id in (select event_id from races where round_id in (11)) then null
             else null end as segment_wkg
