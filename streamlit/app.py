@@ -11,12 +11,10 @@ elif os.getenv("TARGET") == "dev":
 else:
     DB_PATH = f"md:ctt_winter_series_prod"
 
-st.set_page_config(
-    page_title="CTT Winter Series 2025/26", 
-    page_icon=":bike:"
-)
+st.set_page_config(page_title="CTT Winter Series 2025/26", page_icon=":bike:")
 
-st.html("""
+st.html(
+    """
 <style>
         .stMainBlockContainer, stVerticalBlock {
             width: 95% !important;
@@ -40,16 +38,17 @@ st.html("""
             border-radius: 5px;
         }
 </style>
-""")
-
-@st.cache_resource(
-    show_spinner="Establishing database connection"
+"""
 )
+
+
+@st.cache_resource(show_spinner="Establishing database connection")
 def get_db_connection():
     return duckdb.connect(DB_PATH, read_only=False)
 
 
-cache_data_days = 7
+cache_data_days = 0.25
+
 
 @st.cache_data(
     ttl=cache_data_days * 24 * 60 * 60,
@@ -61,7 +60,9 @@ def load_data():
     results = con.sql("select * from core.obt_results").pl()
     rounds = con.sql("select * from core.fct_rounds").pl()
     winners = con.sql("select * from core.fct_winners").pl()
-    latest_data = con.sql("select /*to_timestamp(max(_dlt_load_id::int))*/ max(_dlt_load_id::int) as x from zrapp.results").pl()["x"][0]
+    latest_data = con.sql(
+        "select /*to_timestamp(max(_dlt_load_id::int))*/ max(_dlt_load_id::int) as x from zrapp.results"
+    ).pl()["x"][0]
 
     return [results, rounds, winners, latest_data]
 
@@ -69,37 +70,50 @@ def load_data():
 st.markdown("")
 st.title("CTT Winter Series 2025/26")
 
-st.session_state["results"], st.session_state["rounds"], st.session_state["winners"], latest_data = load_data()
+(
+    st.session_state["results"],
+    st.session_state["rounds"],
+    st.session_state["winners"],
+    latest_data,
+) = load_data()
 
 
-results_page = st.Page("pages/public_results.py", title="Results", icon=":material/trophy:")
-series_analytics_page = st.Page("pages/series_analytics.py", title="Admin", icon=":material/bar_chart:")
+results_page = st.Page(
+    "pages/public_results.py", title="Results", icon=":material/trophy:"
+)
+series_analytics_page = st.Page(
+    "pages/series_analytics.py", title="Admin", icon=":material/bar_chart:"
+)
 
 pg = st.navigation([results_page, series_analytics_page])
 
 
-
-st.sidebar.markdown(f"Data last updated at {dt.fromtimestamp(latest_data).strftime("%H:%m on %d/%m/%Y")}")
-
-
+st.sidebar.markdown(
+    f"Data last updated at {dt.fromtimestamp(latest_data).strftime("%H:%m on %d/%m/%Y")}"
+)
 
 
 pg.run()
 
 
-
-
 # At the end to allow the rest of the page to load - this is just a background process and priority is on ux
 if "visit_logged" not in st.session_state:
     st.session_state["visit_logged"] = True
-    
+
     try:
         con = get_db_connection()
 
-        con.execute("""
+        con.execute(
+            """
             INSERT INTO analytics.site_visits (id, timestamp, session_id, app)
             VALUES (gen_random_uuid(), ?, ?, ?)
-        """, [int(time.time()), st.runtime.scriptrunner.get_script_run_ctx().session_id, os.getenv("APP")])
+        """,
+            [
+                int(time.time()),
+                st.runtime.scriptrunner.get_script_run_ctx().session_id,
+                os.getenv("APP"),
+            ],
+        )
 
     except Exception as e:
         pass

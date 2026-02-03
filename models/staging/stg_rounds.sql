@@ -2,7 +2,7 @@ with
 
 source as (
   select * 
-  from {{ ref("rounds")}}
+  from {{ source('google_sheets', 'rounds') }}
 ),
 
 select_type_and_rename as (

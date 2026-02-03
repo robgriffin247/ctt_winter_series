@@ -2,7 +2,7 @@ with
 
 source as (
   select * 
-  from {{ ref("events")}}
+  from {{ source('google_sheets', 'races') }}
 ),
 
 select_type_and_rename as (

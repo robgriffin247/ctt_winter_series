@@ -2,15 +2,21 @@
 
 # This script runs the ingestion pipeline; it uses the data in seeds/events.csv
 # uv run bash runner.sh # to ingest all events
-# uv run bash runner.sh -r <round_id> # to ingest a round
+# uv run bash runner.sh -r 5 # to ingest round 5
+# uv run bash runner.sh -r 5 7 # to ingest rounds 5 and 7
 # uv run bash runner.sh 12345 67890 # to ingest specific events
 
 # Parse flags
-FILTER_VALUE=""
+FILTER_VALUES=()
 while getopts "r:" opt; do
     case $opt in
         r)
-            FILTER_VALUE="$OPTARG"
+            FILTER_VALUES+=("$OPTARG")
+            # Keep consuming args that don't start with -
+            while [[ $OPTIND -le $# && ${!OPTIND} != -* ]]; do
+                FILTER_VALUES+=("${!OPTIND}")
+                ((OPTIND++))
+            done
             ;;
         \?)
             echo "Invalid option: -$OPTARG" >&2
@@ -26,17 +32,20 @@ shift $((OPTIND-1))
 if [ $# -gt 0 ]; then
     # Positional arguments provided
     items=("$@")
-elif [ -n "$FILTER_VALUE" ]; then
-    # Filter by column 2 value AND past timestamps
-    MY_LIST=$(tail -n +2 seeds/events.csv | awk -F',' -v val="$FILTER_VALUE" -v now="$(date +%s)" '
-        $2 == val {
-            cmd = "date -d \"" $3 "\" +%s 2>/dev/null"
-            cmd | getline ts
-            close(cmd)
-            if (ts <= now) print $1
-        }
-    ' | tr '\n' ' ')
-    items=($MY_LIST)
+elif [ ${#FILTER_VALUES[@]} -gt 0 ]; then
+    # Filter by multiple column 2 values AND past timestamps
+    items=()
+    for filter_val in "${FILTER_VALUES[@]}"; do
+        filtered=$(tail -n +2 seeds/events.csv | awk -F',' -v val="$filter_val" -v now="$(date +%s)" '
+            $2 == val {
+                cmd = "date -d \"" $3 "\" +%s 2>/dev/null"
+                cmd | getline ts
+                close(cmd)
+                if (ts <= now) print $1
+            }
+        ' | tr '\n' ' ')
+        items+=($filtered)
+    done
 else
     # Parse all from CSV, only past timestamps
     MY_LIST=$(tail -n +2 seeds/events.csv | awk -F',' -v now="$(date +%s)" '

@@ -28,6 +28,10 @@ source as (
         watts___76::decimal as watts___76,
         wkg___76::decimal as wkg___76,
         
+        msec___34::decimal as msec___34,
+        watts___34::decimal as watts___34,
+        wkg___34::decimal as wkg___34,
+        
     from {{source("zpdatafetch", "sprint_results")}}
 )
 

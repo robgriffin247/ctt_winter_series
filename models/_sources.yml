@@ -12,8 +12,7 @@ sources:
     schema: google_sheets
     tables:
       - name: rounds
-      - name: events
-      - name: segment_times
+      - name: races
   - name: zpdatafetch
     description: Data from zpdatafetch
     schema: zpdatafetch

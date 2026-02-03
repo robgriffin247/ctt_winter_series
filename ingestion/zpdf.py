@@ -1,7 +1,7 @@
 import zpdatafetch
 import keyring
 import os
-import json 
+import json
 import dlt
 import sys
 
@@ -14,6 +14,7 @@ keyring.set_password("zpdatafetch", "username", os.getenv("ZPUSER"))
 keyring.set_password("zpdatafetch", "password", os.getenv("ZPPASS"))
 
 target = os.getenv("TARGET")
+
 
 @dlt.resource(
     name="sprint_results",
@@ -30,10 +31,11 @@ def get_sprints(event_id) -> Iterator[dict[str, Any]]:
     sprints = zpdatafetch.Sprints()
     sprints.fetch(event_id)
     sprints_json = json.loads(sprints.json())
-    riders = sprints_json.get(f"{event_id}" if isinstance(event_id, int) else event_id).get("data")
+    riders = sprints_json.get(
+        f"{event_id}" if isinstance(event_id, int) else event_id
+    ).get("data")
     for rider in riders:
         yield rider
-
 
 
 @dlt.source
@@ -50,9 +52,13 @@ def ingest_zpdatafetch(payload) -> LoadInfo:
             }
         )
     elif target == "test":
-        _destination = dlt.destinations.duckdb(credentials=f"data/ctt_winter_series_{target}.duckdb")
+        _destination = dlt.destinations.duckdb(
+            credentials=f"data/ctt_winter_series_{target}.duckdb"
+        )
     else:
-        raise ValueError(f"Invalid TARGET value: {target} (should be one of dev, test and prod - ensure env variables have been exported).")
+        raise ValueError(
+            f"Invalid TARGET value: {target} (should be one of dev, test and prod - ensure env variables have been exported)."
+        )
     pipeline = dlt.pipeline(
         pipeline_name=f"ctt_winter_series_{target}_pipeline",
         destination=_destination,
@@ -67,10 +73,7 @@ def ingest_zpdatafetch(payload) -> LoadInfo:
     return load_info
 
 
-
-
 if __name__ == "__main__":
-    event_id = sys.argv[1] if len(sys.argv) > 1 else 5200083 #5205102
+    event_id = sys.argv[1] if len(sys.argv) > 1 else 5200083  # 5205102
     load_info = ingest_zpdatafetch(event_id)
     print(load_info)
-

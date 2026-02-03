@@ -10,8 +10,3 @@ Transformation is performed with:
 uv run duckdb build
 ```
 
-#### To Do
-
-- Working on moving logic for leaderboard into the front end
-    - dim_round_efforts now redundant? remember best_race
-    - Remove mixed and have that handled at front-end (if mixed then filter True)

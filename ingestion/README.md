@@ -5,4 +5,6 @@ Ingestion is performed with:
 ```
 uv run python3 ingestion/zrapp.py <event_id>
 uv run python3 ingestion/zpdf.py <event_id>
+uv run python3 ingestion/google_sheets.py
 ```
+
