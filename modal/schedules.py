@@ -17,6 +17,7 @@ IMAGE = (
     .add_local_dir(PROJECT_ROOT / "ingestion", "/root/ingestion")
     # dbt folders
     .add_local_dir(PROJECT_ROOT / "models", "/root/models")
+    .add_local_dir(PROJECT_ROOT / "macros", "/root/macros")
     .add_local_dir(PROJECT_ROOT / "seeds", "/root/seeds")
     # dbt files
     .add_local_file(PROJECT_ROOT / "dbt_project.yml", "/root/dbt_project.yml")
@@ -70,4 +71,3 @@ def saturday():
     etl_job()
     dlt_volume.commit()
     print("Volume commited")
-

@@ -20,7 +20,6 @@ select_type_and_rename as (
     segment_elevation::int segment_elevation,
     segment_link::varchar as segment_link,
     completed::boolean as round_completed,
-    1 as hello
   from source
 )
 
