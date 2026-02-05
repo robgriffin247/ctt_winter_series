@@ -2,14 +2,10 @@ import duckdb
 import os
 import time
 
-# import gc
-
 from ingestion.google_sheets import ingest_sheets
 from ingestion.zpdf import ingest_zpdatafetch
 from ingestion.zrapp import ingest_zrapp
 from transformer import run_dbt_transformations
-
-# from dbt.cli.main import dbtRunner, dbtRunnerResult
 
 if os.getenv("TARGET") == "test":
     DB_PATH = "data/ctt_winter_series_test.duckdb"
@@ -30,7 +26,7 @@ def etl_job():
             races as (
                 select 
                     event_id,
-                    datediff('hours', start_datetime_utc, now())<=(3*24) as is_recent
+                    datediff('hours', start_datetime_utc, now())<=(2*24) as is_recent
                 from google_sheets.races
             ),
 
@@ -51,19 +47,14 @@ def etl_job():
     if len(races_to_load) > 0:
         i = 0
         for race in races_to_load:
+            if i!=0:
+                print(f"Waiting for 70 seconds before loading {race}")
+                time.sleep(70)
             i += 1
             ingest_zrapp(race)
             ingest_zpdatafetch(race)
-            print("Waiting for 70 seconds next event...")
-            time.sleep(70 if i < len(races_to_load) else 0)
 
-        # print("Cleaning up dlt connections...")
-        # gc.collect()
-        # time.sleep(3)
-
-        # dbt = dbtRunner()
-        # dbt.invoke(["build"])
-        print(run_dbt_transformations())
+    run_dbt_transformations()
 
     return f"ETL job complete, loaded {len(races_to_load)} races!"
 

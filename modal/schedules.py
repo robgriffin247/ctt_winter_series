@@ -3,12 +3,10 @@ from jobs import etl_job
 import modal
 from pathlib import Path
 
-
 PROJECT_ROOT = Path(__file__).parent.parent
 
-image = (
+IMAGE = (
     modal.Image.debian_slim()
-    # .pip_install("dlt[motherduck]", "dbt-duckdb", "httpx", "keyring", "zpdatafetch", "polars")
     .pip_install_from_pyproject(
         PROJECT_ROOT / "pyproject.toml",
     )
@@ -25,45 +23,51 @@ image = (
     .add_local_file(PROJECT_ROOT / "profiles.yml", "/root/profiles.yml")
 )
 
-
-app = modal.App("ctt-elt-jobs", image=image)
-
 dlt_volume = modal.Volume.from_name("ctt-dlt-state", create_if_missing=True)
 
+SECRETS = [modal.Secret.from_name("ctt-secrets")]
+VOLUMES = {"/root/.dlt": dlt_volume}
+TIMEOUT = 900
+RETRIES = 2
+
+app = modal.App("ctt-elt-jobs", image=IMAGE)
 
 @app.function(
     schedule=modal.Cron("30 22 * 10-12,1-4 3"),
-    secrets=[modal.Secret.from_name("ctt-secrets")],
-    volumes={"/root/.dlt": dlt_volume},
-    retries=2,
-    timeout=600,
+    secrets=SECRETS,
+    volumes=VOLUMES,
+    timeout=TIMEOUT,
+    retries=RETRIES,
 )
 def wednesday():
-    etl_job()
+    print(etl_job())
     dlt_volume.commit()
+    print("Volume commited")
 
 
 
 @app.function(
     schedule=modal.Cron("30 2,6 * 10-12,1-4 4"),
-    secrets=[modal.Secret.from_name("ctt-secrets")],
-    volumes={"/root/.dlt": dlt_volume},
-    retries=2,
-    timeout=600,
+    secrets=SECRETS,
+    volumes=VOLUMES,
+    timeout=TIMEOUT,
+    retries=RETRIES,
 )
 def thursday():
     etl_job()
     dlt_volume.commit()
+    print("Volume commited")
 
 
 @app.function(
     schedule=modal.Cron("30 11,18,23 * 10-12,1-4 6"),
-    secrets=[modal.Secret.from_name("ctt-secrets")],
-    volumes={"/root/.dlt": dlt_volume},
-    retries=2,
-    timeout=600,
+    secrets=SECRETS,
+    volumes=VOLUMES,
+    timeout=TIMEOUT,
+    retries=RETRIES,
 )
 def saturday():
     etl_job()
     dlt_volume.commit()
+    print("Volume commited")
 
