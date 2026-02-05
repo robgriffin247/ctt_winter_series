@@ -25,27 +25,3 @@ models:
     analytics:
       +schema: analytics
       +materialized: incremental
-
-seeds:
-  ctt_winter_series:  
-    rounds:
-      +column_types:
-        completed: boolean
-        round_id: integer
-        year: integer
-        week: integer
-        type: varchar
-        route: varchar
-        route_length: double
-        route_elevation: integer
-        route_link: varchar
-        segment: varchar
-        segment_length: double
-        segment_elevation: integer
-        segment_link: varchar
-    events:
-      +column_types:
-        event_id: integer
-        round_id: integer
-        start_datetime_utc: varchar
-        mixed: boolean

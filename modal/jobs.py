@@ -26,7 +26,7 @@ def etl_job():
             races as (
                 select 
                     event_id,
-                    datediff('hours', start_datetime_utc, now())<=(2*24) as is_recent
+                    datediff('hours', start_datetime_utc, now())<=(0*24) as is_recent
                 from google_sheets.races
             ),
 

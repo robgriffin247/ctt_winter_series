@@ -27,7 +27,7 @@ dlt_volume = modal.Volume.from_name("ctt-dlt-state", create_if_missing=True)
 
 SECRETS = [modal.Secret.from_name("ctt-secrets")]
 VOLUMES = {"/root/.dlt": dlt_volume}
-TIMEOUT = 900
+TIMEOUT = 600
 RETRIES = 2
 
 app = modal.App("ctt-elt-jobs", image=IMAGE)
