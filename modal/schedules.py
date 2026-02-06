@@ -48,7 +48,7 @@ def wednesday():
 
 
 @app.function(
-    schedule=modal.Cron("30 2,6 * 10-12,1-4 4"),
+    schedule=modal.Cron("30 2,6,18 * 10-12,1-4 4"),
     secrets=SECRETS,
     volumes=VOLUMES,
     timeout=TIMEOUT,
@@ -68,6 +68,19 @@ def thursday():
     retries=RETRIES,
 )
 def saturday():
+    etl_job()
+    dlt_volume.commit()
+    print("Volume commited")
+
+
+@app.function(
+    schedule=modal.Cron("30 7 * 10-12,1-4 7"),
+    secrets=SECRETS,
+    volumes=VOLUMES,
+    timeout=TIMEOUT,
+    retries=RETRIES,
+)
+def sunday():
     etl_job()
     dlt_volume.commit()
     print("Volume commited")
