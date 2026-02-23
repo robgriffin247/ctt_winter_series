@@ -74,7 +74,7 @@ def saturday():
 
 
 @app.function(
-    schedule=modal.Cron("30 7 * 10-12,1-4 7"),
+    schedule=modal.Cron("40 3,7 * 10-12,1-4 7"),
     secrets=SECRETS,
     volumes=VOLUMES,
     timeout=TIMEOUT,

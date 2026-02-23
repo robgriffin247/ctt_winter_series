@@ -1,7 +1,7 @@
 import duckdb
 import os
 import time
-
+    
 from ingestion.google_sheets import ingest_sheets
 from ingestion.zpdf import ingest_zpdatafetch
 from ingestion.zrapp import ingest_zrapp
@@ -16,6 +16,7 @@ else:
 
 
 def etl_job():
+
     ingest_sheets()
 
     with duckdb.connect(DB_PATH) as con:
@@ -23,11 +24,14 @@ def etl_job():
             con.sql(
                 """
             with 
+            # this is all past races; excludes future races and highlights recent races
             races as (
                 select 
                     event_id,
-                    datediff('hours', start_datetime_utc, now())<=(2*24) as is_recent
+                    datediff('hours', start_datetime_utc, now())<48 as is_recent
                 from google_sheets.races
+                where 
+                    datediff('minutes', start_datetime_utc, now())>0
             ),
 
             ingested_races as (
@@ -37,6 +41,7 @@ def etl_job():
                 group by all
             )
 
+            # Take any past race not already loaded, as well as reloading any recent races
             select * from races where event_id not in (select event_id from ingested_races) or is_recent
             """
             )
@@ -47,12 +52,15 @@ def etl_job():
     if len(races_to_load) > 0:
         i = 0
         for race in races_to_load:
+            print("="*50)
+            print(f"Loading race {race} ({i+1} of {len(races_to_load)})")
             if i!=0:
-                print(f"Waiting for 70 seconds before loading {race}")
+                print(f"⏳ Waiting for 70 seconds before loading")
                 time.sleep(70)
             i += 1
             ingest_zrapp(race)
             ingest_zpdatafetch(race)
+            print(f"✅ Loaded race {race}")
 
     run_dbt_transformations()
 

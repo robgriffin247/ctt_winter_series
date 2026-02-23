@@ -24,12 +24,13 @@ def ingest_zrapp(event_id) -> LoadInfo:
         if not isinstance(event_id, int):
             raise TypeError(f"ID must be an integer, got {event_id!r}")
 
-        print(f"Getting results for event {event_id}")
+        print(f"> Getting race results for event {event_id} from zrapp")
 
         response = httpx.get(f"{url}zp/{event_id}/results", headers=header)
         response.raise_for_status()
 
         riders = response.json()
+        print(f"  Returned {len(riders)} riders 🚴")
 
         INT_VALUES = {
             "zid": "event_id",

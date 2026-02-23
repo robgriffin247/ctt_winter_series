@@ -26,7 +26,7 @@ target = os.getenv("TARGET")
 )
 def get_sprints(event_id) -> Iterator[dict[str, Any]]:
 
-    print(f"Getting sprints for event {event_id}")
+    print(f"> Getting sprints for event {event_id} from zpdatafetch")
 
     sprints = zpdatafetch.Sprints()
     sprints.fetch(event_id)
@@ -34,6 +34,8 @@ def get_sprints(event_id) -> Iterator[dict[str, Any]]:
     riders = sprints_json.get(
         f"{event_id}" if isinstance(event_id, int) else event_id
     ).get("data")
+    print(f"  Returned {len(riders)} riders 🚴")
+
     for rider in riders:
         yield rider
 

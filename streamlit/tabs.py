@@ -691,7 +691,7 @@ def render_schedule(rounds, winners):
             with c2:
                 st.html(
                     f"""<p style="margin-bottom:0">
-                <strong>Route:</strong> <a href="{r['segment_link']}" target="_blank">{r['segment']}</a>
+                <strong>Segment:</strong> <a href="{r['segment_link']}" target="_blank">{r['segment']}</a>
                 </p><p style="margin-bottom:0">
                 <strong>Length:</strong> {r['segment_length']:.1f} km / {(float(r['segment_length'])*0.621):.1f} mi
                 </p>
